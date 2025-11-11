@@ -1,8 +1,9 @@
 export default function Navbar() {
   return (
     <div className="flex justify-between items-center bg-base-100 shadow-md px-8 py-4">
-      <h1 className="text-xl font-semibold">Dashboard Overview</h1>
-      <div className="flex items-center gap-4">
+<h1 className="font-cormorant text-2xl text-slate-800">
+  Dashboard Overview
+</h1>      <div className="flex items-center gap-4">
         <input
           type="text"
           placeholder="Search..."

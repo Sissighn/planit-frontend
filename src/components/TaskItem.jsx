@@ -13,19 +13,19 @@ export default function TaskItem({ task, onToggle, onDelete }) {
       }`}
     >
       <div>
-        <span className="text-lg font-medium">{task.title}</span>{" "}
+<span className="text-lg font-medium text-slate-700">{task.title}</span>
         <span className={`text-sm ${priorityColor}`}>({task.priority})</span>
       </div>
       <div className="space-x-2">
         <button
           onClick={() => onToggle(task.id)}
-          className="px-3 py-1 bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-all"
+className="bg-green-400/70 hover:bg-green-400/90 text-white font-medium px-3 py-1 rounded-lg shadow-soft transition-all duration-200"
         >
           {task.done ? "Undo" : "Done"}
         </button>
         <button
           onClick={() => onDelete(task.id)}
-          className="px-3 py-1 bg-rose-600 rounded-lg hover:bg-rose-700 transition-all"
+className="bg-red-600/70 hover:bg-red-600/70 text-white font-medium px-3 py-1 rounded-lg shadow-soft transition-all duration-200"
         >
           Delete
         </button>
