@@ -1,5 +1,7 @@
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog";
+import EditTaskDialog from "./EditTaskDialog";
+
 
 export default function TaskItem({
   task,
@@ -12,6 +14,7 @@ export default function TaskItem({
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMeta, setConfirmMeta] = useState(null);
+const [editOpen, setEditOpen] = useState(false);
 
   const priorityColor =
     task.priority === "HIGH"
@@ -98,15 +101,13 @@ export default function TaskItem({
                     rounded-xl flex justify-around items-center`}
       >
         <button
-          onClick={() => {
-            onEdit?.(task);
-            onSelect(null);
-          }}
-          className="flex items-center gap-1 text-slate-700 hover:text-purple-700 transition-all"
-        >
-          <span className="material-symbols-outlined text-2xl">edit</span>
-          <span className="font-medium text-sm">Edit</span>
-        </button>
+  onClick={() => setEditOpen(true)}
+  className="flex items-center gap-1 text-slate-700 hover:text-purple-700 transition-all"
+>
+  <span className="material-symbols-outlined text-2xl">edit</span>
+  <span className="font-medium text-sm">Edit</span>
+</button>
+
 
         <button
           onClick={() => openConfirm("archive")}
@@ -135,6 +136,21 @@ export default function TaskItem({
         onConfirm={handleConfirm}
         onCancel={() => setConfirmOpen(false)}
       />
+
+      {editOpen && (
+  <EditTaskDialog
+    task={task}
+    onEdit={(updatedTask) => {
+      onEdit(updatedTask);
+      onSelect(null);     
+      setEditOpen(false);  
+    }}
+    onClose={() => {
+      setEditOpen(false);  
+      onSelect(null);      
+    }}
+  />
+)}
     </div>
   );
 }

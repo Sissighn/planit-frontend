@@ -1,34 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
-export default function AddTaskDialog({ onAdd, onClose }) {
+export default function EditTaskDialog({ task, onEdit, onClose }) {
   const [title, setTitle] = useState("");
   const [deadline, setDeadline] = useState("");
   const [priority, setPriority] = useState("");
 
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title || "");
+      setDeadline(task.deadline ? task.deadline.split("T")[0] : "");
+      setPriority(task.priority || "");
+    }
+  }, [task]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return alert("Please enter a task title.");
-    onAdd({ title, deadline: deadline || null, priority: priority || null });
+
+    const updatedTask = {
+      ...task,
+      title,
+      deadline: deadline || null,
+      priority: priority || null,
+    };
+
+    onEdit(updatedTask);
     onClose();
   };
 
-  return (
-<div
-  className="absolute inset-0 z-[50] flex items-center justify-center 
-             bg-purple-200/20 backdrop-blur-md transition-opacity duration-200"
-  onClick={(e) => {
-    if (e.target === e.currentTarget) onClose?.();
-  }}
->
-  <form
+  const dialog = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center 
+                    bg-purple-200/30 backdrop-blur-md transition-opacity duration-200">
+      <form
         onSubmit={handleSubmit}
         className="bg-gradient-to-br from-purple-50 to-white/90 backdrop-blur-xl 
-                   border border-purple-200/50 rounded-2xl shadow-lg p-6 w-96 space-y-5
-                   transition-all duration-300"
+                   border border-purple-200/50 rounded-2xl shadow-2xl p-6 w-96 space-y-5
+                   transition-all duration-300 animate-modalPop"
       >
         {/* Header */}
         <h2 className="text-2xl font-semibold text-purple-700 text-center mb-2">
-          New Task
+          Edit Task
         </h2>
 
         {/* Input: Title */}
@@ -36,9 +48,9 @@ export default function AddTaskDialog({ onAdd, onClose }) {
           <label className="text-sm font-medium text-purple-800/80">Title</label>
           <input
             type="text"
-            placeholder="Enter task title..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter task title..."
             className="w-full px-3 py-2 rounded-xl border border-purple-200 
                        bg-white/80 focus:outline-none focus:ring-2 focus:ring-purple-300/70 
                        text-gray-800 placeholder-gray-400 transition-all"
@@ -96,4 +108,6 @@ export default function AddTaskDialog({ onAdd, onClose }) {
       </form>
     </div>
   );
+
+  return createPortal(dialog, document.body);
 }

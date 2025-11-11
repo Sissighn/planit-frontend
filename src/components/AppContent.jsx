@@ -23,6 +23,37 @@ const AppContent = forwardRef(function AppContent(_, ref) {
     }
   };
 
+  const handleArchive = async (id) => {
+  try {
+    const response = await fetch(`${baseUrl}/${id}/archive`, { method: "POST" });
+    if (!response.ok) throw new Error(`Backend error ${response.status}`);
+    console.log(`✅ Task ${id} archived`);
+    await fetchTasks(); // Liste neu laden
+  } catch (err) {
+    console.error("❌ Fehler beim Archivieren:", err);
+    alert("Fehler beim Archivieren der Aufgabe.");
+  }
+};
+
+const handleEdit = async (updatedTask) => {
+  try {
+    const response = await fetch(`${baseUrl}/${updatedTask.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedTask),
+    });
+
+    if (!response.ok) throw new Error(`Backend error ${response.status}`);
+    console.log(`✅ Task ${updatedTask.id} updated`);
+    await fetchTasks();
+  } catch (err) {
+    console.error("❌ Fehler beim Bearbeiten:", err);
+    alert("Fehler beim Bearbeiten der Aufgabe.");
+  }
+};
+
+
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -80,6 +111,7 @@ const AppContent = forwardRef(function AppContent(_, ref) {
         tasks={tasks}
         onToggle={handleToggle}
         onDelete={handleDelete}
+        onArchive={handleArchive} 
         onSelect={setSelectedTask}
         selectedTask={selectedTask}
       />
