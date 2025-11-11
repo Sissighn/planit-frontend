@@ -8,39 +8,55 @@ export default function AppContent() {
 
   const baseUrl = "http://localhost:8080/api/tasks";
 
-  // 🔹 Beim Start Tasks vom Backend laden
-  useEffect(() => {
-    fetch(baseUrl)
-      .then((res) => res.json())
-      .then((data) => setTasks(data))
-      .catch((err) => console.error("Fehler beim Laden der Tasks:", err));
-  }, []);
-
-  const handleToggle = async (id) => {
-    await fetch(`${baseUrl}/${id}/done`, { method: "PUT" });
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
-    );
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch(baseUrl);
+      if (!res.ok) throw new Error("Fehler beim Laden der Tasks");
+      const data = await res.json();
+      setTasks(data);
+    } catch (err) {
+      console.error("❌ Fehler beim Laden der Tasks:", err);
+    }
   };
 
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+ const handleToggle = async (id) => {
+  const task = tasks.find((t) => t.id === id);
+  if (!task) return;
+
+  const endpoint = task.done ? "undone" : "done";
+
+  await fetch(`${baseUrl}/${id}/${endpoint}`, { method: "PUT" });
+  await fetchTasks(); 
+};
+
+
+  // 🔹 Task löschen
   const handleDelete = async (id) => {
-    await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-    if (selectedTask?.id === id) setSelectedTask(null);
+    try {
+      await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
+      await fetchTasks(); // nach Löschung neu laden
+      if (selectedTask?.id === id) setSelectedTask(null);
+    } catch (err) {
+      console.error("❌ Fehler beim Löschen:", err);
+    }
   };
 
   return (
-    <div className="text-white">
+    <div className="text-gray-800"> {/* Textfarbe angepasst für helles UI */}
       <TaskList
         tasks={tasks}
         onToggle={handleToggle}
         onDelete={handleDelete}
-        onSelect={setSelectedTask} // ⬅️ NEU
+        onSelect={setSelectedTask}
         selectedTask={selectedTask}
       />
       <ActionButtons
-        onAction={() => {}}
-        selectedTask={selectedTask} // ⬅️ NEU
+        onAction={fetchTasks}        // ✅ ruft jetzt Liste neu ab
+        selectedTask={selectedTask}
       />
     </div>
   );

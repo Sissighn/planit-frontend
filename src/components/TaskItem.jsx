@@ -8,26 +8,50 @@ export default function TaskItem({ task, onToggle, onDelete }) {
 
   return (
     <div
-      className={`flex justify-between items-center bg-white/10 backdrop-blur-md rounded-xl p-4 mb-3 border border-white/20 shadow-sm transition-all ${
-        task.done ? "opacity-50 line-through" : ""
+      className={`flex justify-between items-center bg-white/40 backdrop-blur-xl rounded-2xl p-4 mb-3 border border-white/40 shadow-md hover:shadow-lg transition-all duration-300 ${
+        task.done ? "opacity-80" : ""
       }`}
     >
+      {/* Titel + Priority */}
       <div>
-<span className="text-lg font-medium text-slate-700">{task.title}</span>
-        <span className={`text-sm ${priorityColor}`}>({task.priority})</span>
+        <span
+          className={`text-lg font-medium transition-all ${
+            task.done ? "line-through text-gray-500" : "text-slate-800"
+          }`}
+        >
+          {task.title}
+        </span>{" "}
+        {task.priority && (
+          <span className={`text-sm ${priorityColor}`}>({task.priority})</span>
+        )}
       </div>
-      <div className="space-x-2">
+
+      {/* Icons */}
+      <div className="flex items-center space-x-3">
+        {/* Häkchen: done ↔ undone */}
         <button
           onClick={() => onToggle(task.id)}
-className="bg-green-400/70 hover:bg-green-400/90 text-white font-medium px-3 py-1 rounded-lg shadow-soft transition-all duration-200"
+          className="transition-transform hover:scale-110"
+          title={task.done ? "Als unerledigt markieren" : "Als erledigt markieren"}
         >
-          {task.done ? "Undo" : "Done"}
+          <span
+            className={`material-symbols-outlined text-3xl transition-all duration-300 ${
+              task.done ? "text-green-500" : "text-gray-400"
+            }`}
+          >
+            done_outline
+          </span>
         </button>
+
+        {/* Delete */}
         <button
           onClick={() => onDelete(task.id)}
-className="bg-red-600/70 hover:bg-red-600/70 text-white font-medium px-3 py-1 rounded-lg shadow-soft transition-all duration-200"
+          className="transition-transform hover:scale-110"
+          title="Aufgabe löschen"
         >
-          Delete
+          <span className="material-symbols-outlined text-3xl text-rose-400 hover:text-rose-600 transition-colors duration-300">
+            delete
+          </span>
         </button>
       </div>
     </div>

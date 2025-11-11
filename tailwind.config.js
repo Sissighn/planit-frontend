@@ -11,6 +11,8 @@ export default {
         softPink: "#f8c8dc",
         softYellow: "#ffeebc",
         softBg: "#fdfcff",
+        softLavender: '#e9d5ff',
+        softLilac: '#f3e8ff',
       },
       borderRadius: {
         soft: "1.25rem",
