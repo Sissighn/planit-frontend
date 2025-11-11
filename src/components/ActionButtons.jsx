@@ -4,28 +4,6 @@ import AddTaskDialog from "./AddTaskDialog";
 export default function ActionButtons({ onAction, selectedTask }) {
   const baseUrl = "http://localhost:8080/api/tasks";
   const [showAddDialog, setShowAddDialog] = useState(false);
-
-  //Add Task Handler
-const handleAdd = async (taskData) => {
-  try {
-    const response = await fetch(baseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(taskData),
-    });
-
-    const text = await response.text();
-    console.log("🔍 Backend response:", response.status, text);
-
-    if (!response.ok) throw new Error(`Backend error ${response.status}: ${text}`);
-
-    console.log("✅ Task added:", taskData);
-    onAction("Add");
-  } catch (err) {
-    console.error("❌ Error calling backend:", err);
-    alert("Fehler beim Hinzufügen der Aufgabe.\n" + err.message);
-  }
-};
   
   const handleClick = async (label) => {
     if (!selectedTask && ["Archive"].includes(label)) {
@@ -38,16 +16,9 @@ const handleAdd = async (taskData) => {
       let response;
 
        switch (label) {
-        case "Add":
-          return setShowAddDialog(true);
 
         case "Archive":
           response = await fetch(`${baseUrl}/${id}/archive`, { method: "POST" });
-          break;
-
-        case "View Archive":
-          response = await fetch(`${baseUrl}/archive`);
-          console.log("📦 Archived tasks:", await response.json());
           break;
 
         case "Clear completed":
@@ -78,9 +49,7 @@ const handleAdd = async (taskData) => {
   };
 
   const buttons = [
-    "Add",
     "Archive",
-    "View Archive",
     "Clear completed",
     "Sorting",
     "Settings",
