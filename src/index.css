@@ -1,15 +1,6 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "Tempting";
-  src: url("/fonts/Tempting.woff2") format("woff2"),
-       url("/fonts/Tempting.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
   font-family: "TheJorwayRegular";
   src: url("/fonts/TheJorwayRegular.woff2") format("woff2"),
        url("/fonts/TheJorwayRegular.ttf") format("truetype");
@@ -46,9 +37,6 @@
 }
 
 @layer utilities {
-  .font-tempting {
-    font-family: "Tempting", serif;
-  }
 
   .font-cormorant {
     font-family: "Cormorant", serif;
@@ -79,14 +67,14 @@
 
 }
 .fc {
-  --fc-border-color: rgba(147, 51, 234, 0.2); /* zarte violette Linien */
-  --fc-button-bg-color: #44296a; /* Lila Buttons */
+  --fc-border-color: rgba(147, 51, 234, 0.2); 
+  --fc-button-bg-color: #44296a; 
   --fc-button-border-color: transparent;
-  --fc-button-hover-bg-color: #aa8fde; /* dunkleres Lila */
-  --fc-today-bg-color: rgba(167, 139, 250, 0.15); /* Highlight-Farbe für „today“ */
-  --fc-event-bg-color: #7b589f; /* Task-Event-Farbe */
+  --fc-button-hover-bg-color: #aa8fde; 
+  --fc-today-bg-color: rgba(167, 139, 250, 0.15);
+  --fc-event-bg-color: #7b589f; 
   --fc-event-border-color: transparent;
-  --fc-text-color: #2d1b69; /* Text */
+  --fc-text-color: #2d1b69; 
 }
 
 .option-panel {
@@ -109,8 +97,8 @@
   max-height: 200px;
   opacity: 1;
   transform: scaleY(1);
-  margin-top: 0.75rem;        /* 🪄 sanft auftauchender Abstand */
-  padding: 1rem;              /* erscheint nur, wenn offen */
+  margin-top: 0.75rem;       
+  padding: 1rem;            
 }
 
 

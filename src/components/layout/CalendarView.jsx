@@ -6,6 +6,20 @@ import { useState, useEffect } from "react";
 export default function CalendarView({ tasks = [] }) {
   const [events, setEvents] = useState([]);
 
+  <FullCalendar
+    plugins={[dayGridPlugin, interactionPlugin]}
+    initialView="dayGridMonth"
+    events={events}
+    height="auto" // ✅ dynamisch
+    contentHeight="auto"
+    aspectRatio={1.4} // etwas flexibler
+    headerToolbar={{
+      start: "prev,next today",
+      center: "title",
+      end: "",
+    }}
+  />;
+
   useEffect(() => {
     if (!Array.isArray(tasks)) return;
     const mapped = tasks
