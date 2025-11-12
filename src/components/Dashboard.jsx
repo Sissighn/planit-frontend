@@ -10,8 +10,8 @@ export default function Dashboard({ stats }) {
         {/* 📅 Tasks due today */}
         <div className="flex flex-col items-center justify-center text-center">
           <span className="text-3xl">📅</span>
-          <p className="text-lg font-semibold text-slate-800 mt-1">
-            {stats.dueToday} tasks
+          <p className="text-lg font-cormorant text-slate-800 mt-1">
+            <strong>{stats.dueToday} tasks</strong>
           </p>
           <p className="text-sm text-slate-500">Due today</p>
         </div>
@@ -19,8 +19,8 @@ export default function Dashboard({ stats }) {
         {/* ✅ Completed this week */}
         <div className="flex flex-col items-center justify-center text-center">
           <span className="text-3xl">✅</span>
-          <p className="text-lg font-semibold text-slate-800 mt-1">
-            {stats.completedThisWeek} done
+          <p className="text-lg font-cormorant text-slate-800 mt-1">
+            <strong>{stats.completedThisWeek} done</strong>
           </p>
           <p className="text-sm text-slate-500">This week</p>
         </div>
@@ -28,8 +28,8 @@ export default function Dashboard({ stats }) {
         {/* 🗂️ Archived tasks */}
         <div className="flex flex-col items-center justify-center text-center">
           <span className="text-3xl">🗂️</span>
-          <p className="text-lg font-semibold text-slate-800 mt-1">
-            {stats.archived} archived
+          <p className="text-lg font-cormorant text-slate-800 mt-1">
+            <strong>{stats.archived} archived</strong>
           </p>
           <p className="text-sm text-slate-500">Total archived</p>
         </div>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog";
 import EditTaskDialog from "./EditTaskDialog";
 
-
 export default function TaskItem({
   task,
   isActive,
@@ -14,7 +13,7 @@ export default function TaskItem({
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMeta, setConfirmMeta] = useState(null);
-const [editOpen, setEditOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const priorityColor =
     task.priority === "HIGH"
@@ -28,7 +27,8 @@ const [editOpen, setEditOpen] = useState(false);
       setConfirmMeta({
         type: "delete",
         title: "Delete Task",
-        message: "Do you really want to delete this task? This action cannot be undone.",
+        message:
+          "Do you really want to delete this task? This action cannot be undone.",
         confirmLabel: "Delete",
         variant: "danger",
       });
@@ -55,26 +55,48 @@ const [editOpen, setEditOpen] = useState(false);
     <div
       className={`bg-white/40 backdrop-blur-xl rounded-2xl p-4 mb-4 border border-white/40 
                   shadow-md hover:shadow-lg transition-all duration-300 
-                  ${task.done ? "opacity-80" : ""} ${isActive ? "task-item-active" : ""}`}
+                  ${task.done ? "opacity-80" : ""} ${
+        isActive ? "task-item-active" : ""
+      }`}
     >
       {/* 🔹 Main Task Row */}
       <div className="flex justify-between items-center">
-       <div
-  onClick={() => onSelect(task.id)}
-  className="flex-1 cursor-pointer select-none"
->
-  <span
-    className={`text-lg font-medium transition-all ${
-      task.done ? "line-through text-gray-500" : "text-slate-800"
-    }`}
-  >
-    {task.title}
-  </span>{" "}
-  {task.priority && (
-    <span className={`text-sm ${priorityColor}`}>({task.priority})</span>
-  )}
-</div>
+        <div
+          onClick={() => onSelect(task.id)}
+          className="flex-1 cursor-pointer select-none"
+        >
+          <span
+            className={`text-lg font-medium transition-all ${
+              task.done ? "line-through text-gray-500" : "text-slate-800"
+            }`}
+          >
+            {task.title}
+          </span>{" "}
+          {/* 🔹 Priority und/oder Datum anzeigen */}
+          {(task.priority || task.deadline) && (
+            <span className="text-sm text-gray-600 ml-2">
+              {/* Priorität */}
+              {task.priority && (
+                <span className={`${priorityColor}`}>({task.priority})</span>
+              )}
 
+              {/* Trenner falls beides existiert */}
+              {task.priority && task.deadline && (
+                <span className="mx-1">•</span>
+              )}
+
+              {/* Datum */}
+              {task.deadline && (
+                <span className="text-gray-500">
+                  {new Date(task.deadline).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "short",
+                  })}
+                </span>
+              )}
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center space-x-3">
           <button
@@ -101,20 +123,19 @@ const [editOpen, setEditOpen] = useState(false);
                     rounded-xl flex justify-around items-center`}
       >
         <button
-  onClick={() => setEditOpen(true)}
-  className="flex items-center gap-1 text-slate-700 hover:text-purple-700 transition-all"
->
-  <span className="material-symbols-outlined text-2xl">edit</span>
-  <span className="font-medium text-sm">Edit</span>
-</button>
-
+          onClick={() => setEditOpen(true)}
+          className="flex items-center gap-1 text-slate-700 hover:text-purple-700 transition-all"
+        >
+          <span className="material-symbols-outlined text-2xl">edit</span>
+          <span className="font-medium text-sm">Edit</span>
+        </button>
 
         <button
           onClick={() => openConfirm("archive")}
           className="flex items-center gap-1 text-slate-700 hover:text-purple-700 transition-all"
         >
           <span className="material-symbols-outlined text-2xl">archive</span>
-          <span className="font-medium text-sm">Archive</span>
+          <span className="font-cormorant text-sm">Archive</span>
         </button>
 
         <button
@@ -138,19 +159,19 @@ const [editOpen, setEditOpen] = useState(false);
       />
 
       {editOpen && (
-  <EditTaskDialog
-    task={task}
-    onEdit={(updatedTask) => {
-      onEdit(updatedTask);
-      onSelect(null);     
-      setEditOpen(false);  
-    }}
-    onClose={() => {
-      setEditOpen(false);  
-      onSelect(null);      
-    }}
-  />
-)}
+        <EditTaskDialog
+          task={task}
+          onEdit={(updatedTask) => {
+            onEdit(updatedTask);
+            onSelect(null);
+            setEditOpen(false);
+          }}
+          onClose={() => {
+            setEditOpen(false);
+            onSelect(null);
+          }}
+        />
+      )}
     </div>
   );
 }

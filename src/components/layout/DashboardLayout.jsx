@@ -36,7 +36,7 @@ export default function DashboardLayout() {
       <div className="flex-1 flex flex-col bg-white/70 backdrop-blur-md">
         {/* 🟣 Header */}
         <header className="p-6 border-b border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100">
-          <h1 className="text-3xl font-orange text-soft-purple tracking-wide">
+          <h1 className="text-3xl font-dms text-soft-purple tracking-wide">
             <strong>Dashboard Overview</strong>
           </h1>
           <p className="text-slate-600 mt-1">

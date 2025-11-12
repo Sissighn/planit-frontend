@@ -41,7 +41,7 @@ export default function Sidebar({
           <span className="material-symbols-outlined text-3xl text-black">
             home
           </span>
-          <span className="font-medium text-slate-700">Home</span>
+          <span className="font-cormorant text-slate-700">Home</span>
         </button>
 
         {/* 🗓️ Calendar */}
@@ -55,7 +55,7 @@ export default function Sidebar({
           <span className="material-symbols-outlined text-3xl text-black">
             calendar_month
           </span>
-          <span className="font-medium text-slate-700">Calendar</span>
+          <span className="font-cormorant text-slate-700">Calendar</span>
         </button>
 
         {/* ➕ Add */}
@@ -66,7 +66,7 @@ export default function Sidebar({
           <span className="material-symbols-outlined text-3xl text-black">
             add_circle
           </span>
-          <span className="font-medium text-slate-700">Add Task</span>
+          <span className="font-cormorant text-slate-700">Add Task</span>
         </button>
 
         {/* 📦 Archive */}
@@ -79,7 +79,7 @@ export default function Sidebar({
           <span className="material-symbols-outlined text-3xl text-black">
             archive
           </span>
-          <span className="font-medium text-slate-700">Archive</span>
+          <span className="font-cormorant text-slate-700">Archive</span>
         </button>
       </div>
 
