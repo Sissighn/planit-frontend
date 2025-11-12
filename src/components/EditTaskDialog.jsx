@@ -30,8 +30,10 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
   };
 
   const dialog = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center 
-                    bg-purple-200/30 backdrop-blur-md transition-opacity duration-200">
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center 
+                    bg-purple-200/30 backdrop-blur-md transition-opacity duration-200"
+    >
       <form
         onSubmit={handleSubmit}
         className="bg-gradient-to-br from-purple-50 to-white/90 backdrop-blur-xl 
@@ -45,7 +47,9 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
 
         {/* Input: Title */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-purple-800/80">Title</label>
+          <label className="text-sm font-medium text-purple-800/80">
+            Title
+          </label>
           <input
             type="text"
             value={title}
@@ -59,7 +63,9 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
 
         {/* Input: Deadline */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-purple-800/80">Deadline</label>
+          <label className="text-sm font-medium text-purple-800/80">
+            Deadline
+          </label>
           <input
             type="date"
             value={deadline}
@@ -72,7 +78,9 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
 
         {/* Select: Priority */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-purple-800/80">Priority</label>
+          <label className="text-sm font-medium text-purple-800/80">
+            Priority
+          </label>
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}

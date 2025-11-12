@@ -1,5 +1,6 @@
 import { LayoutDashboard, ListTodo, Settings } from "lucide-react";
 import Greeting from "./Greeting";
+import ThemeSwitch from "./ThemeSwitch";
 
 export default function Sidebar({
   onAddClick,
@@ -17,13 +18,15 @@ export default function Sidebar({
       : "hover:scale-105";
 
   return (
-    <div className="w-64 bg-purple-100/80 backdrop-blur-md 
+    <div
+      className="w-64 bg-purple-100/80 backdrop-blur-md 
                     shadow-lg min-h-screen p-6 flex flex-col gap-6
-                    border-r border-white/40">
+                    border-r border-white/40"
+    >
       <h1 className="font-ruigslay text-soft-purple text-5xl tracking-wide mb-2">
         <strong>PlanIT</strong>
       </h1>
-<Greeting />
+      <Greeting />
 
       {/* 🔸 Aktionen */}
       <div className="mt-8 flex flex-col items-start gap-4 border-t border-white/40 pt-6">
@@ -34,7 +37,9 @@ export default function Sidebar({
             "home"
           )}`}
         >
-          <span className="material-symbols-outlined text-3xl text-black">home</span>
+          <span className="material-symbols-outlined text-3xl text-black">
+            home
+          </span>
           <span className="font-medium text-slate-700">Home</span>
         </button>
 
@@ -43,7 +48,9 @@ export default function Sidebar({
           onClick={safe(onAddClick)}
           className="flex items-center gap-2 text-black hover:scale-105 transition-transform rounded-lg px-2 py-1"
         >
-          <span className="material-symbols-outlined text-3xl text-black">add_circle</span>
+          <span className="material-symbols-outlined text-3xl text-black">
+            add_circle
+          </span>
           <span className="font-medium text-slate-700">Add Task</span>
         </button>
 
@@ -54,9 +61,17 @@ export default function Sidebar({
             "archive"
           )}`}
         >
-          <span className="material-symbols-outlined text-3xl text-black">archive</span>
+          <span className="material-symbols-outlined text-3xl text-black">
+            archive
+          </span>
           <span className="font-medium text-slate-700">Archive</span>
         </button>
+      </div>
+
+      {/* ⚙️ Theme Switch unten */}
+      <div className="border-t border-white/40 pt-4 mt-6">
+        <ThemeSwitch />
+        <button className="btn btn-primary mt-4">Test DaisyUI</button>
       </div>
     </div>
   );

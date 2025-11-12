@@ -43,8 +43,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* 🔸 Inhalt (Tasks / Add Dialog etc.) */}
-        <main 
-className="flex-1 relative overflow-hidden"        >
+        <main className="flex-1 relative overflow-hidden">
           <AppContent ref={appRef} />
         </main>
       </div>

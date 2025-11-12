@@ -18,8 +18,6 @@ export default function Greeting() {
   }, []);
 
   return (
-    <p className="text-lg font-medium text-black/80 mt-1 ml-1">
-      {greeting}
-    </p>
+    <p className="text-lg font-medium text-black/80 mt-1 ml-1">{greeting}</p>
   );
 }

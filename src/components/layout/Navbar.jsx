@@ -9,6 +9,6 @@ export default function Navbar() {
       <h1 className="font-orange text-2xl text-slate-800">
         Dashboard Overview
       </h1>
-      </div>
+    </div>
   );
 }

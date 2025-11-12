@@ -1,7 +1,6 @@
 export default function Dashboard({ stats }) {
   return (
     <div className="w-full mb-6">
-
       <div
         className="grid grid-cols-1 sm:grid-cols-3 gap-4 
                    bg-gradient-to-r from-purple-50/60 to-white/80 

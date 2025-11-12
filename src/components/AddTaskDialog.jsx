@@ -13,14 +13,14 @@ export default function AddTaskDialog({ onAdd, onClose }) {
   };
 
   return (
-<div
-  className="absolute inset-0 z-[50] flex items-center justify-center 
+    <div
+      className="absolute inset-0 z-[50] flex items-center justify-center 
              bg-purple-200/20 backdrop-blur-md transition-opacity duration-200"
-  onClick={(e) => {
-    if (e.target === e.currentTarget) onClose?.();
-  }}
->
-  <form
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose?.();
+      }}
+    >
+      <form
         onSubmit={handleSubmit}
         className="bg-gradient-to-br from-purple-50 to-white/90 backdrop-blur-xl 
                    border border-purple-200/50 rounded-2xl shadow-lg p-6 w-96 space-y-5
@@ -33,7 +33,9 @@ export default function AddTaskDialog({ onAdd, onClose }) {
 
         {/* Input: Title */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-purple-800/80">Title</label>
+          <label className="text-sm font-medium text-purple-800/80">
+            Title
+          </label>
           <input
             type="text"
             placeholder="Enter task title..."
@@ -47,7 +49,9 @@ export default function AddTaskDialog({ onAdd, onClose }) {
 
         {/* Input: Deadline */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-purple-800/80">Deadline</label>
+          <label className="text-sm font-medium text-purple-800/80">
+            Deadline
+          </label>
           <input
             type="date"
             value={deadline}
@@ -60,7 +64,9 @@ export default function AddTaskDialog({ onAdd, onClose }) {
 
         {/* Select: Priority */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-purple-800/80">Priority</label>
+          <label className="text-sm font-medium text-purple-800/80">
+            Priority
+          </label>
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
