@@ -49,10 +49,7 @@ export default function ActionButtons({ onAction, selectedTask }) {
   };
 
   const buttons = [
-    "Archive",
-    "Clear completed",
-    "Sorting",
-    "Settings",
+ 
   ];
 
    return (

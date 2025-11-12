@@ -2,6 +2,7 @@ import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import TaskList from "./TaskList";
 import ActionButtons from "./ActionButtons";
 import AddTaskDialog from "./AddTaskDialog";
+import Dashboard from "./Dashboard";
 
 const AppContent = forwardRef(function AppContent(_, ref) {
   const [tasks, setTasks] = useState([]);
@@ -28,7 +29,9 @@ const AppContent = forwardRef(function AppContent(_, ref) {
     const response = await fetch(`${baseUrl}/${id}/archive`, { method: "POST" });
     if (!response.ok) throw new Error(`Backend error ${response.status}`);
     console.log(`✅ Task ${id} archived`);
-    await fetchTasks(); // Liste neu laden
+    await fetchTasks(); 
+    await fetchArchivedCount();
+
   } catch (err) {
     console.error("❌ Fehler beim Archivieren:", err);
     alert("Fehler beim Archivieren der Aufgabe.");
@@ -52,10 +55,24 @@ const handleEdit = async (updatedTask) => {
   }
 };
 
+const fetchArchivedCount = async () => {
+  try {
+    const res = await fetch(`${baseUrl}/archive`);
+    if (!res.ok) throw new Error("Fehler beim Laden der archivierten Aufgaben");
+    const data = await res.json();
+    setArchivedCount(data.length);
+  } catch (err) {
+    console.error("❌ Fehler beim Laden der Archiv-Anzahl:", err);
+  }
+};
+
+
 
 
   useEffect(() => {
     fetchTasks();
+      fetchArchivedCount();
+
   }, []);
 
   useImperativeHandle(ref, () => ({
@@ -105,23 +122,64 @@ const handleEdit = async (updatedTask) => {
     }
   };
 
+  const [archivedCount, setArchivedCount] = useState(0);
+
+  // 🧮 Dashboard Stats
+const stats = !showArchive
+  ? {
+      dueToday: tasks.filter((t) => {
+        if (!t.deadline || t.archived) return false;
+        const today = new Date().toISOString().split("T")[0];
+        return t.deadline.startsWith(today);
+      }).length,
+      completedThisWeek: tasks.filter((t) => {
+        if (!t.done || t.archived) return false;
+        const updated = new Date(t.updatedAt || Date.now());
+        const now = new Date();
+        const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
+        return updated >= oneWeekAgo;
+      }).length,
+      archived: archivedCount, // ✅ Jetzt echte Zahl aus Backend
+    }
+  : null;
+
+
+
   return (
-    <div className="text-gray-800">
+  <div className="text-gray-800">
+    <div className="max-w-3xl mx-auto w-full flex flex-col gap-8">
+      {/* Dashboard Overview */}
+      {stats && <Dashboard stats={stats} />}
+
+      {/* Task List */}
       <TaskList
         tasks={tasks}
         onToggle={handleToggle}
         onDelete={handleDelete}
-        onArchive={handleArchive} 
+        onArchive={handleArchive}
         onSelect={setSelectedTask}
         selectedTask={selectedTask}
       />
-      <ActionButtons onAction={() => fetchTasks(showArchive)} selectedTask={selectedTask} />
 
-      {showAddDialog && (
-        <AddTaskDialog onAdd={handleAdd} onClose={() => setShowAddDialog(false)} />
-      )}
+      {/* Action Buttons */}
+      <div className="flex justify-center">
+        <ActionButtons
+          onAction={() => fetchTasks(showArchive)}
+          selectedTask={selectedTask}
+        />
+      </div>
     </div>
-  );
+
+    {/* Add Task Dialog */}
+    {showAddDialog && (
+      <AddTaskDialog
+        onAdd={handleAdd}
+        onClose={() => setShowAddDialog(false)}
+      />
+    )}
+  </div>
+);
+
 });
 
 export default AppContent;

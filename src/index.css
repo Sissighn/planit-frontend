@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @font-face {
   font-family: "Tempting";
@@ -7,14 +8,83 @@
   font-style: normal;
   font-display: swap;
 }
+
+@font-face {
+  font-family: "TheJorwayRegular";
+  src: url("/fonts/TheJorwayRegular.woff2") format("woff2"),
+       url("/fonts/TheJorwayRegular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pavon";
+  src: url("/fonts/Pavon.woff2") format("woff2"),
+       url("/fonts/Pavon.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Ruigslay";
+  src: url("/fonts/Ruigslay.woff2") format("woff2"),
+       url("/fonts/Ruigslay.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OrangeAvenue";
+  src: url("/fonts/OrangeAvenue.woff2") format("woff2"),
+       url("/fonts/OrangeAvenue.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer utilities {
+  .font-tempting {
+    font-family: "Tempting", serif;
+  }
+
+  .font-cormorant {
+    font-family: "Cormorant", serif;
+  }
+
+  .font-jorway {
+    font-family: "TheJorwayRegular", serif;
+  }
+
+  .font-pavon {
+    font-family: "Pavon", serif;
+  }
+
+  .font-ruigslay {
+    font-family: "Ruigslay", serif;
+  }
+
+  .font-orange {
+    font-family: "OrangeAvenue", serif;
+  }
+}
+
+
+
+@layer utilities {
+  .text-soft-purple { color: #55368f; }
+}
+
 .option-panel {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
   transform: scaleY(0.95);
   transform-origin: top;
-  margin-top: 0;              /* 🧠 verhindert extra Abstand */
-  padding: 0 1rem;            /* nur horizontal, kein vertical padding */
+  margin-top: 0;             
+  padding: 0 1rem;           
   transition:
     max-height 0.6s cubic-bezier(0.25, 1, 0.5, 1),
     opacity 0.4s ease,

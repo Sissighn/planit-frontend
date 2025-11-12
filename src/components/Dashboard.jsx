@@ -1,14 +1,39 @@
 export default function Dashboard({ stats }) {
   return (
-    <div className="flex justify-center gap-6 mb-6 text-sm md:text-base">
-      <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl shadow-md border border-white/20">
-        📦 Archiviert: <span className="text-indigo-300 font-semibold">{stats.archived}</span>
-      </div>
-      <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl shadow-md border border-white/20">
-        ✅ Erledigt: <span className="text-emerald-300 font-semibold">{stats.done}</span>
-      </div>
-      <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl shadow-md border border-white/20">
-        🗒️ Gesamt: <span className="text-yellow-300 font-semibold">{stats.total}</span>
+    <div className="w-full mb-6">
+
+      <div
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4 
+                   bg-gradient-to-r from-purple-50/60 to-white/80 
+                   backdrop-blur-xl border border-purple-200/40 
+                   rounded-2xl shadow-sm p-4"
+      >
+        {/* 📅 Tasks due today */}
+        <div className="flex flex-col items-center justify-center text-center">
+          <span className="text-3xl">📅</span>
+          <p className="text-lg font-semibold text-slate-800 mt-1">
+            {stats.dueToday} tasks
+          </p>
+          <p className="text-sm text-slate-500">Due today</p>
+        </div>
+
+        {/* ✅ Completed this week */}
+        <div className="flex flex-col items-center justify-center text-center">
+          <span className="text-3xl">✅</span>
+          <p className="text-lg font-semibold text-slate-800 mt-1">
+            {stats.completedThisWeek} done
+          </p>
+          <p className="text-sm text-slate-500">This week</p>
+        </div>
+
+        {/* 🗂️ Archived tasks */}
+        <div className="flex flex-col items-center justify-center text-center">
+          <span className="text-3xl">🗂️</span>
+          <p className="text-lg font-semibold text-slate-800 mt-1">
+            {stats.archived} archived
+          </p>
+          <p className="text-sm text-slate-500">Total archived</p>
+        </div>
       </div>
     </div>
   );

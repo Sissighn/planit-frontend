@@ -2,18 +2,7 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
   extend: {
-    fontFamily: {
-      cormorant: ["Cormorant", "serif"],
-      tempting: ["Tempting", "cursive"],
-    },
-      colors: {
-        softPurple: "#cbb2fe",
-        softPink: "#f8c8dc",
-        softYellow: "#ffeebc",
-        softBg: "#fdfcff",
-        softLavender: '#e9d5ff',
-        softLilac: '#f3e8ff',
-      },
+    
       borderRadius: {
         soft: "1.25rem",
       },

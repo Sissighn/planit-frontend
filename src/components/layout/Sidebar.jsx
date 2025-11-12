@@ -1,4 +1,5 @@
 import { LayoutDashboard, ListTodo, Settings } from "lucide-react";
+import Greeting from "./Greeting";
 
 export default function Sidebar({
   onAddClick,
@@ -19,9 +20,10 @@ export default function Sidebar({
     <div className="w-64 bg-purple-100/80 backdrop-blur-md 
                     shadow-lg min-h-screen p-6 flex flex-col gap-6
                     border-r border-white/40">
-      <h1 className="font-tempting text-3xl text-purple-700 tracking-wide mb-2">
-        PlanIT
+      <h1 className="font-ruigslay text-soft-purple text-5xl tracking-wide mb-2">
+        <strong>PlanIT</strong>
       </h1>
+<Greeting />
 
       {/* 🔸 Aktionen */}
       <div className="mt-8 flex flex-col items-start gap-4 border-t border-white/40 pt-6">
