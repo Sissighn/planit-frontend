@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Sidebar from "./Sidebar";
-import AppContent from "../AppContent";
-import CalendarView from "./CalendarView";
+import AppContent from "./AppContent";
+import CalendarView from "../view/CalendarView";
 
 export default function DashboardLayout() {
   const appRef = useRef(null);

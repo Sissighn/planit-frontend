@@ -1,7 +1,7 @@
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
-import TaskList from "./TaskList";
-import ActionButtons from "./ActionButtons";
-import AddTaskDialog from "./AddTaskDialog";
+import TaskList from "../tasks/TaskList";
+import ActionButtons from "../common/ActionButtons";
+import AddTaskDialog from "../tasks/AddTaskDialog";
 import Dashboard from "./Dashboard";
 
 const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {

@@ -1,5 +1,5 @@
-import Greeting from "./Greeting";
-import ThemeSwitch from "./ThemeSwitch";
+import Greeting from "../view/Greeting";
+import ThemeSwitch from "../common/ThemeSwitch";
 
 export default function Sidebar({
   onAddClick,

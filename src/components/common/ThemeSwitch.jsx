@@ -6,8 +6,13 @@ export default function ThemeSwitch() {
   // Wendet das gewählte Theme auf das <html>-Element an
   const applyTheme = (selectedTheme) => {
     if (selectedTheme === "system") {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      document.documentElement.setAttribute(
+        "data-theme",
+        prefersDark ? "dark" : "light"
+      );
     } else {
       document.documentElement.setAttribute("data-theme", selectedTheme);
     }

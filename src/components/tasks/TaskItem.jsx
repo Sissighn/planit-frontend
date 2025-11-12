@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ConfirmDialog from "./ConfirmDialog";
+import ConfirmDialog from "../common/ConfirmDialog";
 import EditTaskDialog from "./EditTaskDialog";
 
 export default function TaskItem({

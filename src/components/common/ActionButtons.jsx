@@ -1,10 +1,10 @@
 import { useState } from "react";
-import AddTaskDialog from "./AddTaskDialog";
+import AddTaskDialog from "../tasks/AddTaskDialog";
 
 export default function ActionButtons({ onAction, selectedTask }) {
   const baseUrl = "http://localhost:8080/api/tasks";
   const [showAddDialog, setShowAddDialog] = useState(false);
-  
+
   const handleClick = async (label) => {
     if (!selectedTask && ["Archive"].includes(label)) {
       alert("⚠️ Bitte zuerst eine Aufgabe auswählen!");
@@ -15,14 +15,17 @@ export default function ActionButtons({ onAction, selectedTask }) {
     try {
       let response;
 
-       switch (label) {
-
+      switch (label) {
         case "Archive":
-          response = await fetch(`${baseUrl}/${id}/archive`, { method: "POST" });
+          response = await fetch(`${baseUrl}/${id}/archive`, {
+            method: "POST",
+          });
           break;
 
         case "Clear completed":
-          response = await fetch(`${baseUrl}/clear-completed`, { method: "DELETE" });
+          response = await fetch(`${baseUrl}/clear-completed`, {
+            method: "DELETE",
+          });
           break;
 
         case "Sorting":
@@ -48,11 +51,9 @@ export default function ActionButtons({ onAction, selectedTask }) {
     }
   };
 
-  const buttons = [
- 
-  ];
+  const buttons = [];
 
-   return (
+  return (
     <div className="mt-8">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {buttons.map((label, i) => (
@@ -69,7 +70,10 @@ export default function ActionButtons({ onAction, selectedTask }) {
       </div>
 
       {showAddDialog && (
-        <AddTaskDialog onAdd={handleAdd} onClose={() => setShowAddDialog(false)} />
+        <AddTaskDialog
+          onAdd={handleAdd}
+          onClose={() => setShowAddDialog(false)}
+        />
       )}
     </div>
   );

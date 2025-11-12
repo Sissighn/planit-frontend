@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import TaskItem from "./TaskItem";
 
-export default function TaskList({ tasks, onToggle, onDelete, onArchive, onEdit }) {
+export default function TaskList({
+  tasks,
+  onToggle,
+  onDelete,
+  onArchive,
+  onEdit,
+}) {
   const [activeTaskId, setActiveTaskId] = useState(null);
 
   useEffect(() => {
