@@ -1,6 +1,5 @@
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import TaskList from "../tasks/TaskList";
-import ActionButtons from "../common/ActionButtons";
 import AddTaskDialog from "../tasks/AddTaskDialog";
 import Dashboard from "./Dashboard";
 
@@ -159,14 +158,6 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
           onSelect={setSelectedTask}
           selectedTask={selectedTask}
         />
-
-        {/* Action Buttons */}
-        <div className="flex justify-center">
-          <ActionButtons
-            onAction={() => fetchTasks(showArchive)}
-            selectedTask={selectedTask}
-          />
-        </div>
       </div>
 
       {/* Add Task Dialog */}

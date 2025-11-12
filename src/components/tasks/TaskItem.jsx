@@ -20,7 +20,9 @@ export default function TaskItem({
       ? "text-red-400"
       : task.priority === "LOW"
       ? "text-blue-400"
-      : "text-yellow-400";
+      : task.priority === "MEDIUM"
+      ? "text-yellow-400"
+      : "text-gray-400";
 
   const openConfirm = (type) => {
     if (type === "delete") {
