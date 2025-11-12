@@ -75,6 +75,18 @@
 
 @layer utilities {
   .text-soft-purple { color: #55368f; }
+    .text-soft-pink { color: #d787af; }
+
+}
+.fc {
+  --fc-border-color: rgba(147, 51, 234, 0.2); /* zarte violette Linien */
+  --fc-button-bg-color: #44296a; /* Lila Buttons */
+  --fc-button-border-color: transparent;
+  --fc-button-hover-bg-color: #aa8fde; /* dunkleres Lila */
+  --fc-today-bg-color: rgba(167, 139, 250, 0.15); /* Highlight-Farbe für „today“ */
+  --fc-event-bg-color: #7b589f; /* Task-Event-Farbe */
+  --fc-event-border-color: transparent;
+  --fc-text-color: #2d1b69; /* Text */
 }
 
 .option-panel {

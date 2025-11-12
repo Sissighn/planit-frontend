@@ -1,4 +1,3 @@
-import { LayoutDashboard, ListTodo, Settings } from "lucide-react";
 import Greeting from "./Greeting";
 import ThemeSwitch from "./ThemeSwitch";
 
@@ -6,6 +5,7 @@ export default function Sidebar({
   onAddClick,
   onArchiveClick,
   onHomeClick,
+  onCalendarClick,
   activeView,
 }) {
   const safe = (fn) => (e) => {
@@ -19,13 +19,14 @@ export default function Sidebar({
 
   return (
     <div
-      className="w-64 bg-purple-100/80 backdrop-blur-md 
+      className="w-69 bg-purple-100/80 backdrop-blur-md 
                     shadow-lg min-h-screen p-6 flex flex-col gap-6
                     border-r border-white/40"
     >
       <h1 className="font-ruigslay text-soft-purple text-5xl tracking-wide mb-2">
         <strong>PlanIT</strong>
       </h1>
+
       <Greeting />
 
       {/* 🔸 Aktionen */}
@@ -41,6 +42,20 @@ export default function Sidebar({
             home
           </span>
           <span className="font-medium text-slate-700">Home</span>
+        </button>
+
+        {/* 🗓️ Calendar */}
+        <button
+          onClick={safe(onCalendarClick)}
+          className={`flex items-center gap-2 text-black transition-all rounded-lg px-2 py-1 ${isActive(
+            "calendar"
+          )}`}
+          aria-current={activeView === "calendar" ? "page" : undefined}
+        >
+          <span className="material-symbols-outlined text-3xl text-black">
+            calendar_month
+          </span>
+          <span className="font-medium text-slate-700">Calendar</span>
         </button>
 
         {/* ➕ Add */}
@@ -68,7 +83,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* ⚙️ Theme Switch unten */}
+      {/* ⚙️ Theme Switch */}
       <div className="border-t border-white/40 pt-4 mt-6">
         <ThemeSwitch />
         <button className="btn btn-primary mt-4">Test DaisyUI</button>

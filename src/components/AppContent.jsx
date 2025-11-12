@@ -4,11 +4,12 @@ import ActionButtons from "./ActionButtons";
 import AddTaskDialog from "./AddTaskDialog";
 import Dashboard from "./Dashboard";
 
-const AppContent = forwardRef(function AppContent(_, ref) {
+const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const [archivedCount, setArchivedCount] = useState(0);
 
   const baseUrl = "http://localhost:8080/api/tasks";
 
@@ -19,6 +20,10 @@ const AppContent = forwardRef(function AppContent(_, ref) {
       if (!res.ok) throw new Error("Fehler beim Laden der Tasks");
       const data = await res.json();
       setTasks(data);
+      console.log("📤 sending tasks to Dashboard:", data);
+      onTasksUpdate?.(data);
+
+      onTasksUpdate?.(data); // ⬅️ Callback nach oben senden
     } catch (err) {
       console.error("❌ Fehler beim Laden der Tasks:", err);
     }
@@ -119,8 +124,6 @@ const AppContent = forwardRef(function AppContent(_, ref) {
       console.error("❌ Fehler beim Löschen:", err);
     }
   };
-
-  const [archivedCount, setArchivedCount] = useState(0);
 
   // 🧮 Dashboard Stats
   const stats = !showArchive
