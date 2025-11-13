@@ -1,14 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AddTaskDialog({ onAdd, onClose }) {
   const [title, setTitle] = useState("");
   const [deadline, setDeadline] = useState("");
   const [priority, setPriority] = useState("");
+  const [groups, setGroups] = useState([]); //
+  const [selectedGroupId, setSelectedGroupId] = useState(""); //
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/groups")
+      .then((res) => res.json())
+      .then(setGroups)
+      .catch((err) => console.error("Failed to load groups:", err));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return alert("Please enter a task title.");
-    onAdd({ title, deadline: deadline || null, priority: priority || null });
+
+    onAdd({
+      title,
+      deadline: deadline || null,
+      priority: priority || null,
+      groupId: selectedGroupId || null,
+    });
+
     onClose();
   };
 
@@ -26,12 +42,11 @@ export default function AddTaskDialog({ onAdd, onClose }) {
                    border border-purple-200/50 rounded-2xl shadow-lg p-6 w-96 space-y-5
                    transition-all duration-300"
       >
-        {/* Header */}
         <h2 className="text-2xl font-semibold text-purple-700 text-center mb-2">
           New Task
         </h2>
 
-        {/* Input: Title */}
+        {/* Title */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-purple-800/80">
             Title
@@ -47,7 +62,7 @@ export default function AddTaskDialog({ onAdd, onClose }) {
           />
         </div>
 
-        {/* Input: Deadline */}
+        {/* Deadline */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-purple-800/80">
             Deadline
@@ -62,7 +77,7 @@ export default function AddTaskDialog({ onAdd, onClose }) {
           />
         </div>
 
-        {/* Select: Priority */}
+        {/* Priority */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-purple-800/80">
             Priority
@@ -81,7 +96,28 @@ export default function AddTaskDialog({ onAdd, onClose }) {
           </select>
         </div>
 
-        {/* Action Buttons */}
+        {/* Group Dropdown */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-purple-800/80">
+            Group
+          </label>
+          <select
+            value={selectedGroupId}
+            onChange={(e) => setSelectedGroupId(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl border border-purple-200 
+                       bg-white/80 focus:outline-none focus:ring-2 focus:ring-purple-300/70 
+                       text-gray-800 transition-all"
+          >
+            <option value="">No group</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Buttons */}
         <div className="flex justify-end gap-3 pt-4">
           <button
             type="button"

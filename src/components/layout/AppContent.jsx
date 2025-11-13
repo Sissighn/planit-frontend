@@ -22,7 +22,7 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
       console.log("📤 sending tasks to Dashboard:", data);
       onTasksUpdate?.(data);
 
-      onTasksUpdate?.(data); // ⬅️ Callback nach oben senden
+      onTasksUpdate?.(data);
     } catch (err) {
       console.error("❌ Fehler beim Laden der Tasks:", err);
     }
@@ -139,7 +139,7 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
           const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
           return updated >= oneWeekAgo;
         }).length,
-        archived: archivedCount, // ✅ Jetzt echte Zahl aus Backend
+        archived: archivedCount,
       }
     : null;
 

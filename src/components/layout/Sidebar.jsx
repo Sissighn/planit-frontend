@@ -1,11 +1,13 @@
 import Greeting from "../view/Greeting";
 import ThemeSwitch from "../common/ThemeSwitch";
+import GroupList from "../groups/GroupList";
 
 export default function Sidebar({
-  onAddClick,
-  onArchiveClick,
   onHomeClick,
+  onAddClick,
   onCalendarClick,
+  onArchiveClick,
+  onSelectGroup,
   activeView,
 }) {
   const safe = (fn) => (e) => {
@@ -19,7 +21,7 @@ export default function Sidebar({
 
   return (
     <div
-      className="w-69 bg-purple-100/80 backdrop-blur-md 
+      className="w-64 bg-purple-100/80 backdrop-blur-md 
                     shadow-lg min-h-screen p-6 flex flex-col gap-6
                     border-r border-white/40"
     >
@@ -29,9 +31,9 @@ export default function Sidebar({
 
       <Greeting />
 
-      {/* 🔸 Aktionen */}
-      <div className="mt-8 flex flex-col items-start gap-4 border-t border-white/40 pt-6">
-        {/* 🏠 Home */}
+      {/* Menu */}
+      <div className="mt-4 flex flex-col items-start gap-4 border-t border-white/40 pt-4">
+        {/* Home */}
         <button
           onClick={safe(onHomeClick)}
           className={`flex items-center gap-2 text-black transition-all rounded-lg px-2 py-1 ${isActive(
@@ -44,7 +46,18 @@ export default function Sidebar({
           <span className="font-cormorant text-slate-700">Home</span>
         </button>
 
-        {/* 🗓️ Calendar */}
+        {/* Add */}
+        <button
+          onClick={safe(onAddClick)}
+          className="flex items-center gap-2 text-black hover:scale-105 transition-transform rounded-lg px-2 py-1"
+        >
+          <span className="material-symbols-outlined text-3xl text-black">
+            add_circle
+          </span>
+          <span className="font-cormorant text-slate-700">Add Task</span>
+        </button>
+
+        {/* Calendar */}
         <button
           onClick={safe(onCalendarClick)}
           className={`flex items-center gap-2 text-black transition-all rounded-lg px-2 py-1 ${isActive(
@@ -58,18 +71,7 @@ export default function Sidebar({
           <span className="font-cormorant text-slate-700">Calendar</span>
         </button>
 
-        {/* ➕ Add */}
-        <button
-          onClick={safe(onAddClick)}
-          className="flex items-center gap-2 text-black hover:scale-105 transition-transform rounded-lg px-2 py-1"
-        >
-          <span className="material-symbols-outlined text-3xl text-black">
-            add_circle
-          </span>
-          <span className="font-cormorant text-slate-700">Add Task</span>
-        </button>
-
-        {/* 📦 Archive */}
+        {/* Archive */}
         <button
           onClick={safe(onArchiveClick)}
           className={`flex items-center gap-2 text-black transition-all rounded-lg px-2 py-1 ${isActive(
@@ -83,10 +85,9 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* ⚙️ Theme Switch */}
-      <div className="border-t border-white/40 pt-4 mt-6">
-        <ThemeSwitch />
-        <button className="btn btn-primary mt-4">Test DaisyUI</button>
+      {/* Groups */}
+      <div className="mt-2 border-t border-white/40 pt-4">
+        <GroupList onSelectGroup={onSelectGroup} />
       </div>
     </div>
   );

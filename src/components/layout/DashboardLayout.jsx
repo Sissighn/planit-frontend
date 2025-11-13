@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import AppContent from "./AppContent";
 import CalendarView from "../view/CalendarView";
@@ -6,8 +6,25 @@ import CalendarView from "../view/CalendarView";
 export default function DashboardLayout() {
   const appRef = useRef(null);
   const [activeView, setActiveView] = useState("home");
-  const [tasks, setTasks] = useState([]); // 🔹 globale Tasks
 
+  // 🔹 Globale States
+  const [tasks, setTasks] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
+  // 🔹 Tasks aus Backend laden
+  useEffect(() => {
+    fetch("http://localhost:8080/api/tasks")
+      .then((res) => res.json())
+      .then(setTasks)
+      .catch((err) => console.error("Failed to load tasks:", err));
+  }, []);
+
+  // 🔹 Filter: sichtbare Tasks je nach ausgewählter Kategorie
+  const visibleTasks = selectedCategoryId
+    ? tasks.filter((t) => t.groupId === Number(selectedCategoryId))
+    : tasks;
+
+  // 🔹 Sidebar-Actions
   const handleAddClick = () => appRef.current?.openAdd?.();
   const handleHomeClick = async () => {
     await appRef.current?.showHomeView?.();
@@ -21,6 +38,12 @@ export default function DashboardLayout() {
 
   const handleCalendarClick = async () => setActiveView("calendar");
 
+  const handleSelectGroup = (groupId) => {
+    console.log("Selected category ID:", groupId);
+    setSelectedCategoryId(groupId);
+    setActiveView("home");
+  };
+
   return (
     <div className="flex min-h-screen">
       {/* 🔹 Sidebar */}
@@ -29,6 +52,7 @@ export default function DashboardLayout() {
         onArchiveClick={handleArchiveClick}
         onHomeClick={handleHomeClick}
         onCalendarClick={handleCalendarClick}
+        onSelectGroup={handleSelectGroup}
         activeView={activeView}
       />
 
@@ -44,22 +68,28 @@ export default function DashboardLayout() {
               ? "Viewing archived tasks"
               : activeView === "calendar"
               ? "Calendar view"
+              : selectedCategoryId
+              ? "Tasks in selected category"
               : "Your active tasks at a glance"}
           </p>
         </header>
 
-        {/* 🔸 Inhalt: Responsive Grid */}
+        {/* 🔸 Inhalt */}
         <main
           className="
             flex-1 grid gap-6 p-6
-            grid-cols-1               /* Standard: untereinander */
-            lg:grid-cols-[2fr_1.3fr]  /* Ab large-screen: nebeneinander */
+            grid-cols-1
+            lg:grid-cols-[2fr_1.3fr]
             items-start
           "
         >
           {/* 📝 Task Content */}
           <div className="relative">
-            <AppContent ref={appRef} onTasksUpdate={setTasks} />
+            <AppContent
+              ref={appRef}
+              onTasksUpdate={setTasks}
+              filteredTasks={visibleTasks}
+            />
           </div>
 
           {/* 🗓️ Calendar View */}
@@ -67,12 +97,10 @@ export default function DashboardLayout() {
             <div
               className="
                 bg-white/80 backdrop-blur-md rounded-2xl shadow-md p-4 
-                w-full
-                sm:min-h-[400px]
-                transition-all
+                w-full sm:min-h-[400px] transition-all
               "
             >
-              <CalendarView tasks={tasks} />
+              <CalendarView tasks={visibleTasks} />
             </div>
           )}
         </main>
