@@ -100,7 +100,10 @@ export default function DashboardLayout() {
                 w-full sm:min-h-[400px] transition-all
               "
             >
-              <CalendarView tasks={visibleTasks} />
+              <CalendarView
+                tasks={visibleTasks}
+                onQuickAdd={(date) => appRef.current?.quickAdd(date)}
+              />{" "}
             </div>
           )}
         </main>

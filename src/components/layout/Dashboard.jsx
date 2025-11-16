@@ -7,7 +7,7 @@ export default function Dashboard({ stats }) {
                    backdrop-blur-xl border border-purple-200/40 
                    rounded-2xl shadow-sm p-4"
       >
-        {/* 📅 Tasks due today */}
+        {/* Tasks due today */}
         <div className="flex flex-col items-center justify-center text-center">
           <span className="text-3xl">📅</span>
           <p className="text-lg font-cormorant text-slate-800 mt-1">
@@ -16,7 +16,7 @@ export default function Dashboard({ stats }) {
           <p className="text-sm text-slate-500">Due today</p>
         </div>
 
-        {/* ✅ Completed this week */}
+        {/* Completed this week */}
         <div className="flex flex-col items-center justify-center text-center">
           <span className="text-3xl">✅</span>
           <p className="text-lg font-cormorant text-slate-800 mt-1">
@@ -25,7 +25,7 @@ export default function Dashboard({ stats }) {
           <p className="text-sm text-slate-500">This week</p>
         </div>
 
-        {/* 🗂️ Archived tasks */}
+        {/* Archived tasks */}
         <div className="flex flex-col items-center justify-center text-center">
           <span className="text-3xl">🗂️</span>
           <p className="text-lg font-cormorant text-slate-800 mt-1">

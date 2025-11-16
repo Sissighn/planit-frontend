@@ -7,64 +7,79 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [presetDate, setPresetDate] = useState(null); // <-- IMPORTANT
   const [showArchive, setShowArchive] = useState(false);
   const [archivedCount, setArchivedCount] = useState(0);
 
   const baseUrl = "http://localhost:8080/api/tasks";
 
+  // -----------------------------------------------------
+  // FETCH ALL TASKS
+  // -----------------------------------------------------
   const fetchTasks = async (archived = false) => {
     try {
       const url = archived ? `${baseUrl}/archive` : baseUrl;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Fehler beim Laden der Tasks");
+
       const data = await res.json();
       setTasks(data);
-      console.log("📤 sending tasks to Dashboard:", data);
-      onTasksUpdate?.(data);
-
       onTasksUpdate?.(data);
     } catch (err) {
       console.error("❌ Fehler beim Laden der Tasks:", err);
     }
   };
 
+  // -----------------------------------------------------
+  // QUICK-ADD FROM CALENDAR
+  // -----------------------------------------------------
+  const handleQuickAdd = (date) => {
+    setPresetDate(date);
+    setShowAddDialog(true);
+  };
+
+  // -----------------------------------------------------
+  // ARCHIVE TASK
+  // -----------------------------------------------------
   const handleArchive = async (id) => {
     try {
-      const response = await fetch(`${baseUrl}/${id}/archive`, {
-        method: "POST",
-      });
-      if (!response.ok) throw new Error(`Backend error ${response.status}`);
-      console.log(`✅ Task ${id} archived`);
+      const res = await fetch(`${baseUrl}/${id}/archive`, { method: "POST" });
+      if (!res.ok) throw new Error("Archivieren fehlgeschlagen");
+
       await fetchTasks();
       await fetchArchivedCount();
     } catch (err) {
       console.error("❌ Fehler beim Archivieren:", err);
-      alert("Fehler beim Archivieren der Aufgabe.");
     }
   };
 
+  // -----------------------------------------------------
+  // EDIT TASK
+  // -----------------------------------------------------
   const handleEdit = async (updatedTask) => {
     try {
-      const response = await fetch(`${baseUrl}/${updatedTask.id}`, {
+      const res = await fetch(`${baseUrl}/${updatedTask.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedTask),
       });
 
-      if (!response.ok) throw new Error(`Backend error ${response.status}`);
-      console.log(`✅ Task ${updatedTask.id} updated`);
-      await fetchTasks();
+      if (!res.ok) throw new Error("Bearbeiten fehlgeschlagen");
+
+      await fetchTasks(showArchive);
     } catch (err) {
       console.error("❌ Fehler beim Bearbeiten:", err);
-      alert("Fehler beim Bearbeiten der Aufgabe.");
     }
   };
 
+  // -----------------------------------------------------
+  // ARCHIVED COUNT
+  // -----------------------------------------------------
   const fetchArchivedCount = async () => {
     try {
       const res = await fetch(`${baseUrl}/archive`);
-      if (!res.ok)
-        throw new Error("Fehler beim Laden der archivierten Aufgaben");
+      if (!res.ok) throw new Error("Fehler beim Laden der Archiv-Anzahl");
+
       const data = await res.json();
       setArchivedCount(data.length);
     } catch (err) {
@@ -72,59 +87,92 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
     }
   };
 
+  // -----------------------------------------------------
+  // INITIAL LOAD
+  // -----------------------------------------------------
   useEffect(() => {
     fetchTasks();
     fetchArchivedCount();
   }, []);
 
+  // -----------------------------------------------------
+  // SIDEBAR COMMANDS
+  // -----------------------------------------------------
   useImperativeHandle(ref, () => ({
-    openAdd: () => setShowAddDialog(true),
+    openAdd: () => {
+      setPresetDate(null); // reset preset date
+      setShowAddDialog(true);
+    },
+
+    quickAdd: (date) => {
+      setPresetDate(date);
+      setShowAddDialog(true);
+    },
+
     showArchiveView: async () => {
       setShowArchive(true);
       await fetchTasks(true);
     },
+
     showHomeView: async () => {
       setShowArchive(false);
       await fetchTasks(false);
     },
+
     isArchiveView: () => showArchive,
   }));
 
+  // -----------------------------------------------------
+  // ADD TASK HANDLER
+  // -----------------------------------------------------
   const handleAdd = async (taskData) => {
     try {
-      const response = await fetch(baseUrl, {
+      const res = await fetch(baseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(taskData),
       });
-      if (!response.ok) throw new Error(`Backend error ${response.status}`);
+
+      if (!res.ok) throw new Error("Add fehlgeschlagen");
+
       await fetchTasks(showArchive);
       setShowAddDialog(false);
+      setPresetDate(null); // cleanup
     } catch (err) {
       console.error("❌ Fehler beim Hinzufügen:", err);
-      alert("Fehler beim Hinzufügen der Aufgabe.");
     }
   };
 
+  // -----------------------------------------------------
+  // TOGGLE TASK
+  // -----------------------------------------------------
   const handleToggle = async (id) => {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
+
     const endpoint = task.done ? "undone" : "done";
+
     await fetch(`${baseUrl}/${id}/${endpoint}`, { method: "PUT" });
     await fetchTasks(showArchive);
   };
 
+  // -----------------------------------------------------
+  // DELETE TASK
+  // -----------------------------------------------------
   const handleDelete = async (id) => {
     try {
       await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
       await fetchTasks(showArchive);
+
       if (selectedTask?.id === id) setSelectedTask(null);
     } catch (err) {
       console.error("❌ Fehler beim Löschen:", err);
     }
   };
 
-  // 🧮 Dashboard Stats
+  // -----------------------------------------------------
+  // DASHBOARD STATS
+  // -----------------------------------------------------
   const stats = !showArchive
     ? {
         dueToday: tasks.filter((t) => {
@@ -132,21 +180,26 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
           const today = new Date().toISOString().split("T")[0];
           return t.deadline.startsWith(today);
         }).length,
+
         completedThisWeek: tasks.filter((t) => {
           if (!t.done || t.archived) return false;
           const updated = new Date(t.updatedAt || Date.now());
           const now = new Date();
-          const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
-          return updated >= oneWeekAgo;
+          const weekAgo = new Date(now.setDate(now.getDate() - 7));
+          return updated >= weekAgo;
         }).length,
+
         archived: archivedCount,
       }
     : null;
 
+  // -----------------------------------------------------
+  // RENDER
+  // -----------------------------------------------------
   return (
     <div className="text-gray-800">
       <div className="max-w-3xl mx-auto w-full flex flex-col gap-8">
-        {/* Dashboard Overview */}
+        {/* Dashboard */}
         {stats && <Dashboard stats={stats} />}
 
         {/* Task List */}
@@ -165,6 +218,7 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
         <AddTaskDialog
           onAdd={handleAdd}
           onClose={() => setShowAddDialog(false)}
+          presetDate={presetDate} // <-- 🔥 Wichtig!
         />
       )}
     </div>
