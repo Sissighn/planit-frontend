@@ -3,7 +3,6 @@ import TaskList from "../tasks/TaskList";
 import AddTaskDialog from "../tasks/AddTaskDialog";
 import EditTaskDialog from "../tasks/EditTaskDialog";
 import Dashboard from "./Dashboard";
-import { getNextOccurrence } from "../../utils/recurrence";
 
 const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   const [tasks, setTasks] = useState([]);
@@ -31,6 +30,19 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
       onTasksUpdate?.(data);
     } catch (err) {
       console.error("❌ Fehler beim Laden der Tasks:", err);
+    }
+  };
+
+  const fetchTodayTasks = async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const res = await fetch(`${baseUrl}/today`);
+      if (!res.ok) throw new Error("Failed to load today's tasks");
+      const data = await res.json();
+      setTasks(data);
+      onTasksUpdate?.(data);
+    } catch (err) {
+      console.error("❌ Fehler beim Laden der 'heute fälligen' Tasks:", err);
     }
   };
 
@@ -166,10 +178,9 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   // INITIAL LOAD
   // -----------------------------------------------------
   useEffect(() => {
-    fetchTasks();
+    fetchTasks(false); // active tasks
     fetchArchivedCount();
   }, []);
-
   // -----------------------------------------------------
   // SIDEBAR COMMANDS
   // -----------------------------------------------------
@@ -287,20 +298,21 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   function isTaskVisibleToday(task) {
     const todayISO = new Date().toISOString().split("T")[0];
 
-    // archived -> nicht im Dashboard
     if (task.archived) return false;
 
-    // Tasks ohne Datum -> immer sichtbar
-    if (!task.deadline && task.repeatFrequency === "NONE") return true;
+    // 1. Tasks ohne Datum → immer sichtbar
+    if (!task.deadline) return true;
 
-    // recurring -> only today’s occurrence
-    if (task.repeatFrequency !== "NONE") {
-      const next = getNextOccurrence(task);
-      return next === todayISO;
-    }
+    // 2. Overdue → sichtbar
+    if (task.deadline < todayISO) return true;
 
-    // normale Aufgaben
-    return task.deadline === todayISO;
+    // 3. Deadline heute → sichtbar
+    if (task.deadline === todayISO) return true;
+
+    // 4. Recurring → immer sichtbar (zeigt nächste Instanz mit Datum)
+    if (task.repeatFrequency !== "NONE") return true;
+
+    return false;
   }
 
   // -----------------------------------------------------
