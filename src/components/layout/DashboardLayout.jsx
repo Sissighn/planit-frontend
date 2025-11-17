@@ -7,11 +7,11 @@ export default function DashboardLayout() {
   const appRef = useRef(null);
   const [activeView, setActiveView] = useState("home");
 
-  // 🔹 Globale States
+  // Global states
   const [tasks, setTasks] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-  // 🔹 Tasks aus Backend laden
+  // Load all tasks from backend
   const loadTasks = () => {
     fetch("http://localhost:8080/api/tasks")
       .then((res) => res.json())
@@ -23,12 +23,12 @@ export default function DashboardLayout() {
     loadTasks();
   }, []);
 
-  // 🔹 Filter: sichtbare Tasks je nach ausgewählter Kategorie
+  // Filter: visible tasks based on selected category
   const visibleTasks = selectedCategoryId
     ? tasks.filter((t) => t.groupId === Number(selectedCategoryId))
     : tasks;
 
-  // 🔹 Sidebar-Actions
+  // Sidebar actions
   const handleAddClick = () => appRef.current?.openAdd?.();
   const handleHomeClick = async () => {
     await appRef.current?.showHomeView?.();
@@ -40,7 +40,9 @@ export default function DashboardLayout() {
     setActiveView("archive");
   };
 
-  const handleCalendarClick = async () => setActiveView("calendar");
+  const handleCalendarClick = () => {
+    setActiveView("calendar");
+  };
 
   const handleSelectGroup = (groupId) => {
     console.log("Selected category ID:", groupId);
@@ -50,7 +52,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex min-h-screen">
-      {/* 🔹 Sidebar */}
+      {/* Sidebar */}
       <Sidebar
         onAddClick={handleAddClick}
         onArchiveClick={handleArchiveClick}
@@ -60,9 +62,9 @@ export default function DashboardLayout() {
         activeView={activeView}
       />
 
-      {/* 🔸 Hauptbereich */}
+      {/* Main area */}
       <div className="flex-1 flex flex-col bg-white/70 backdrop-blur-md">
-        {/* 🟣 Header */}
+        {/* Header */}
         <header className="p-6 border-b border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100">
           <h1 className="text-3xl font-dms text-soft-purple tracking-wide">
             <strong>Dashboard Overview</strong>
@@ -78,30 +80,55 @@ export default function DashboardLayout() {
           </p>
         </header>
 
-        {/* 🔸 Inhalt */}
-        <main
-          className="
-            flex-1 grid gap-6 p-6
-            grid-cols-1
-            lg:grid-cols-[2fr_1.3fr]
-            items-start
-          "
-        >
-          {/* 📝 Task Content */}
-          <div className="relative">
-            <AppContent
-              ref={appRef}
-              onTasksUpdate={setTasks}
-              filteredTasks={visibleTasks}
-            />
+        {/* Content area */}
+        <main className="flex-1 p-6 space-y-6">
+          {/* Home + Archive views */}
+          <div
+            className={
+              activeView === "calendar"
+                ? "hidden"
+                : "grid gap-6 grid-cols-1 lg:grid-cols-[2fr_1.3fr] items-start"
+            }
+          >
+            {/* Full AppContent (task list + dialogs + stats) */}
+            <div className="relative">
+              <AppContent ref={appRef} onTasksUpdate={setTasks} />
+            </div>
+
+            {/* Small calendar inside Home view only */}
+            {activeView === "home" && (
+              <div
+                className="
+                  bg-white/80 backdrop-blur-md rounded-2xl shadow-md p-4 
+                  w-full sm:min-h-[400px] transition-all
+                "
+              >
+                <CalendarView
+                  tasks={visibleTasks}
+                  onQuickAdd={(date) => appRef.current?.quickAdd(date)}
+                  onQuickEdit={(task) => appRef.current?.quickEdit(task)}
+                  onQuickDelete={(id) => appRef.current?.quickDelete(id)}
+                  onQuickArchive={(id) => appRef.current?.quickArchive(id)}
+                  onQuickDeleteOne={(task, date) =>
+                    appRef.current?.quickDeleteOne(task, date)
+                  }
+                  onQuickDeleteFuture={(task, date) =>
+                    appRef.current?.quickDeleteFuture(task, date)
+                  }
+                  onQuickDeleteSeries={(id) =>
+                    appRef.current?.quickDeleteSeries(id)
+                  }
+                />
+              </div>
+            )}
           </div>
 
-          {/* 🗓️ Calendar View */}
-          {activeView === "home" && (
+          {/* Fullscreen calendar view */}
+          {activeView === "calendar" && (
             <div
               className="
                 bg-white/80 backdrop-blur-md rounded-2xl shadow-md p-4 
-                w-full sm:min-h-[400px] transition-all
+                w-full min-h-[650px]
               "
             >
               <CalendarView
@@ -119,7 +146,7 @@ export default function DashboardLayout() {
                 onQuickDeleteSeries={(id) =>
                   appRef.current?.quickDeleteSeries(id)
                 }
-              />{" "}
+              />
             </div>
           )}
         </main>
