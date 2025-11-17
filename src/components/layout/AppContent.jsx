@@ -3,6 +3,7 @@ import TaskList from "../tasks/TaskList";
 import AddTaskDialog from "../tasks/AddTaskDialog";
 import EditTaskDialog from "../tasks/EditTaskDialog";
 import Dashboard from "./Dashboard";
+import { getNextOccurrence } from "../../utils/recurrence";
 
 const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   const [tasks, setTasks] = useState([]);
@@ -12,6 +13,7 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   const [presetDate, setPresetDate] = useState(null);
   const [showArchive, setShowArchive] = useState(false);
   const [archivedCount, setArchivedCount] = useState(0);
+  const visibleTasks = tasks.filter(isTaskVisibleToday);
 
   const baseUrl = "http://localhost:8080/api/tasks";
 
@@ -282,6 +284,24 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
         archived: archivedCount,
       }
     : null;
+  function isTaskVisibleToday(task) {
+    const todayISO = new Date().toISOString().split("T")[0];
+
+    // archived -> nicht im Dashboard
+    if (task.archived) return false;
+
+    // Tasks ohne Datum -> immer sichtbar
+    if (!task.deadline && task.repeatFrequency === "NONE") return true;
+
+    // recurring -> only today’s occurrence
+    if (task.repeatFrequency !== "NONE") {
+      const next = getNextOccurrence(task);
+      return next === todayISO;
+    }
+
+    // normale Aufgaben
+    return task.deadline === todayISO;
+  }
 
   // -----------------------------------------------------
   // RENDER
@@ -294,7 +314,7 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
 
         {/* Task List */}
         <TaskList
-          tasks={tasks}
+          tasks={visibleTasks}
           onToggle={handleToggle}
           onDelete={handleDelete}
           onArchive={handleArchive}

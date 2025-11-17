@@ -76,24 +76,31 @@ export default function TaskItem({
           </span>{" "}
           {/* 🔹 Priority und/oder Datum anzeigen */}
           {(task.priority || task.deadline) && (
-            <span className="text-sm text-gray-600 ml-2">
-              {/* Priorität */}
+            <span className="ml-2 inline-flex items-center gap-2 text-gray-500 text-sm">
+              {/* Priority */}
               {task.priority && (
                 <span className={`${priorityColor}`}>({task.priority})</span>
               )}
 
-              {/* Trenner falls beides existiert */}
-              {task.priority && task.deadline && (
-                <span className="mx-1">•</span>
-              )}
-
-              {/* Datum */}
+              {/* Date */}
               {task.deadline && (
                 <span className="text-gray-500">
                   {new Date(task.deadline).toLocaleDateString("de-DE", {
                     day: "2-digit",
                     month: "short",
                   })}
+                </span>
+              )}
+
+              {/* Recurrence */}
+              {task.repeatFrequency !== "NONE" && (
+                <span className="inline-flex items-center gap-1 text-gray-500 text-xs">
+                  <span className="material-symbols-outlined text-[15px] leading-none">
+                    repeat
+                  </span>
+                  <span className="capitalize">
+                    {task.repeatFrequency.toLowerCase()}
+                  </span>
                 </span>
               )}
             </span>
