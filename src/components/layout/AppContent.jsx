@@ -1,13 +1,15 @@
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import TaskList from "../tasks/TaskList";
 import AddTaskDialog from "../tasks/AddTaskDialog";
+import EditTaskDialog from "../tasks/EditTaskDialog";
 import Dashboard from "./Dashboard";
 
 const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [presetDate, setPresetDate] = useState(null); // <-- IMPORTANT
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [presetDate, setPresetDate] = useState(null);
   const [showArchive, setShowArchive] = useState(false);
   const [archivedCount, setArchivedCount] = useState(0);
 
@@ -67,6 +69,8 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
       if (!res.ok) throw new Error("Bearbeiten fehlgeschlagen");
 
       await fetchTasks(showArchive);
+      setShowEditDialog(false);
+      setSelectedTask(null);
     } catch (err) {
       console.error("❌ Fehler beim Bearbeiten:", err);
     }
@@ -84,6 +88,75 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
       setArchivedCount(data.length);
     } catch (err) {
       console.error("❌ Fehler beim Laden der Archiv-Anzahl:", err);
+    }
+  };
+
+  // -----------------------------------------------------
+  // DELETE: ONLY THIS OCCURRENCE
+  // -----------------------------------------------------
+  const quickDeleteOne = async (task, date) => {
+    try {
+      const res = await fetch(`${baseUrl}/${task.id}/exclude-date`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date }),
+      });
+
+      if (!res.ok) throw new Error("Couldn't delete single occurrence");
+
+      await fetchTasks(showArchive);
+    } catch (err) {
+      console.error("❌ quickDeleteOne error:", err);
+      alert("Error deleting this event.");
+    }
+  };
+
+  // -----------------------------------------------------
+  // DELETE: THIS + FUTURE
+  // -----------------------------------------------------
+  const quickDeleteFuture = async (task, date) => {
+    try {
+      // date - 1 day
+      const endDate = new Date(date);
+      endDate.setDate(endDate.getDate() - 1);
+
+      const formatted = endDate.toISOString().split("T")[0];
+
+      const updated = {
+        ...task,
+        repeatUntil: formatted,
+      };
+
+      const res = await fetch(`${baseUrl}/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+
+      if (!res.ok) throw new Error("Couldn't delete future occurrences");
+
+      await fetchTasks(showArchive);
+    } catch (err) {
+      console.error("❌ quickDeleteFuture error:", err);
+      alert("Error deleting future events.");
+    }
+  };
+
+  // -----------------------------------------------------
+  // DELETE: ENTIRE SERIES
+  // -----------------------------------------------------
+  const quickDeleteSeries = async (id) => {
+    try {
+      const res = await fetch(`${baseUrl}/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Couldn't delete full series");
+
+      await fetchTasks(showArchive);
+    } catch (err) {
+      console.error("❌ quickDeleteSeries error:", err);
+      alert("Error deleting task series.");
     }
   };
 
@@ -109,6 +182,19 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
       setShowAddDialog(true);
     },
 
+    quickEdit: (task) => {
+      setSelectedTask(task);
+      setShowEditDialog(true);
+    },
+
+    quickDelete: async (id) => {
+      await handleDelete(id);
+    },
+
+    quickArchive: async (id) => {
+      await handleArchive(id);
+    },
+
     showArchiveView: async () => {
       setShowArchive(true);
       await fetchTasks(true);
@@ -118,6 +204,10 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
       setShowArchive(false);
       await fetchTasks(false);
     },
+
+    quickDeleteOne: (task, date) => quickDeleteOne(task, date),
+    quickDeleteFuture: (task, date) => quickDeleteFuture(task, date),
+    quickDeleteSeries: (id) => quickDeleteSeries(id),
 
     isArchiveView: () => showArchive,
   }));
@@ -219,6 +309,14 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
           onAdd={handleAdd}
           onClose={() => setShowAddDialog(false)}
           presetDate={presetDate} // <-- 🔥 Wichtig!
+        />
+      )}
+      {/* Edit Task Dialog */}
+      {showEditDialog && selectedTask && (
+        <EditTaskDialog
+          task={selectedTask}
+          onEdit={handleEdit}
+          onClose={() => setShowEditDialog(false)}
         />
       )}
     </div>

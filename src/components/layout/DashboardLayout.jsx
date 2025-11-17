@@ -12,11 +12,15 @@ export default function DashboardLayout() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   // 🔹 Tasks aus Backend laden
-  useEffect(() => {
+  const loadTasks = () => {
     fetch("http://localhost:8080/api/tasks")
       .then((res) => res.json())
       .then(setTasks)
       .catch((err) => console.error("Failed to load tasks:", err));
+  };
+
+  useEffect(() => {
+    loadTasks();
   }, []);
 
   // 🔹 Filter: sichtbare Tasks je nach ausgewählter Kategorie
@@ -103,6 +107,18 @@ export default function DashboardLayout() {
               <CalendarView
                 tasks={visibleTasks}
                 onQuickAdd={(date) => appRef.current?.quickAdd(date)}
+                onQuickEdit={(task) => appRef.current?.quickEdit(task)}
+                onQuickDelete={(id) => appRef.current?.quickDelete(id)}
+                onQuickArchive={(id) => appRef.current?.quickArchive(id)}
+                onQuickDeleteOne={(task, date) =>
+                  appRef.current?.quickDeleteOne(task, date)
+                }
+                onQuickDeleteFuture={(task, date) =>
+                  appRef.current?.quickDeleteFuture(task, date)
+                }
+                onQuickDeleteSeries={(id) =>
+                  appRef.current?.quickDeleteSeries(id)
+                }
               />{" "}
             </div>
           )}
