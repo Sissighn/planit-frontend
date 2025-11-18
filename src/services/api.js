@@ -12,6 +12,12 @@ async function jsonOrThrow(res) {
     err.status = res.status;
     throw err;
   }
+
+  // ⭐ Handle 204 No Content explicitly
+  if (res.status === 204) {
+    return null;
+  }
+
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }
@@ -34,7 +40,7 @@ export async function addTask(task) {
   return jsonOrThrow(res);
 }
 
-export async function updateTask(id, updates, method = "PATCH") {
+export async function updateTask(id, updates, method = "PUT") {
   const res = await fetch(`${API_URL}/${id}`, {
     method,
     headers: { "Content-Type": "application/json" },
@@ -50,6 +56,11 @@ export async function deleteTask(id) {
 
 export async function archiveTask(id) {
   const res = await fetch(`${API_URL}/${id}/archive`, { method: "POST" });
+  return jsonOrThrow(res);
+}
+
+export async function getArchivedTasks() {
+  const res = await fetch(`${API_URL}/archive`);
   return jsonOrThrow(res);
 }
 
