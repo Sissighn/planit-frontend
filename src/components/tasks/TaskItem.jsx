@@ -15,6 +15,9 @@ export default function TaskItem({
   const [confirmMeta, setConfirmMeta] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
 
+  // -----------------------------
+  // COLORS
+  // -----------------------------
   const priorityColor =
     task.priority === "HIGH"
       ? "text-red-400"
@@ -24,11 +27,29 @@ export default function TaskItem({
       ? "text-yellow-400"
       : "text-gray-400";
 
-  const displayDate =
-    task.repeatFrequency && task.repeatFrequency !== "NONE"
-      ? task.nextOccurrence || task.deadline
-      : task.deadline || null;
+  // -----------------------------
+  // FRONTEND DISPLAY DATE
+  // -----------------------------
+  const displayDate = (() => {
+    if (task.repeatFrequency && task.repeatFrequency !== "NONE") {
+      return task.nextOccurrence || null;
+    }
+    return task.deadline || null;
+  })();
 
+  // -----------------------------
+  // CHECK IF TASK IS DONE
+  // For one-time tasks: check task.done
+  // For recurring tasks: we show nextOccurrence, so it's never "done" in UI
+  // -----------------------------
+  const isDone =
+    task.repeatFrequency && task.repeatFrequency !== "NONE"
+      ? false // Recurring tasks are never shown as "done"
+      : task.done;
+
+  // -----------------------------
+  // CONFIRM DELETE / ARCHIVE
+  // -----------------------------
   const openConfirm = (type) => {
     if (type === "delete") {
       setConfirmMeta({
@@ -58,33 +79,47 @@ export default function TaskItem({
     onSelect(null);
   };
 
+  // -----------------------------
+  // HANDLE TOGGLE (DONE) ✅ VEREINFACHT
+  // -----------------------------
+  const handleToggle = async () => {
+    // Simply call parent's onToggle with the task ID
+    // Parent handles all the logic
+    onToggle(task.id);
+  };
+
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
     <div
       className={`bg-white/40 backdrop-blur-xl rounded-2xl p-4 mb-4 border border-white/40 
-                  shadow-md hover:shadow-lg transition-all duration-300 
-                  ${task.done ? "opacity-80" : ""} ${
-        isActive ? "task-item-active" : ""
-      }`}
+      shadow-md hover:shadow-lg transition-all duration-300 
+      ${isDone ? "opacity-80" : ""} ${isActive ? "task-item-active" : ""}`}
     >
       <div className="flex justify-between items-center">
         <div
           onClick={() => onSelect(task.id)}
           className="flex-1 cursor-pointer select-none"
         >
+          {/* TITLE */}
           <span
             className={`text-lg font-medium transition-all ${
-              task.done ? "line-through text-gray-500" : "text-slate-800"
+              isDone ? "line-through text-gray-500" : "text-slate-800"
             }`}
           >
             {task.title}
           </span>
 
+          {/* META INFO */}
           {(task.priority || displayDate) && (
             <span className="ml-2 inline-flex items-center gap-2 text-gray-500 text-sm">
+              {/* PRIORITY */}
               {task.priority && (
                 <span className={priorityColor}>({task.priority})</span>
               )}
 
+              {/* DATE */}
               {displayDate && (
                 <span className="text-gray-500">
                   {new Date(displayDate).toLocaleDateString("de-DE", {
@@ -94,6 +129,7 @@ export default function TaskItem({
                 </span>
               )}
 
+              {/* REPEAT ICON */}
               {task.repeatFrequency && task.repeatFrequency !== "NONE" && (
                 <span className="inline-flex items-center gap-1 text-gray-500 text-xs">
                   <span className="material-symbols-outlined text-[15px] leading-none">
@@ -108,15 +144,16 @@ export default function TaskItem({
           )}
         </div>
 
+        {/* DONE BUTTON */}
         <div className="flex items-center space-x-3">
           <button
-            onClick={() => onToggle(task.id)}
+            onClick={handleToggle}
             className="transition-transform hover:scale-110"
-            title={task.done ? "Mark as undone" : "Mark as done"}
+            title={isDone ? "Mark as undone" : "Mark as done"}
           >
             <span
               className={`material-symbols-outlined text-3xl transition-all duration-300 ${
-                task.done ? "text-green-500" : "text-gray-400"
+                isDone ? "text-green-500" : "text-gray-400"
               }`}
             >
               done_outline
@@ -125,6 +162,7 @@ export default function TaskItem({
         </div>
       </div>
 
+      {/* ACTION PANEL */}
       <div
         className={`option-panel ${isActive ? "open" : ""} 
                     bg-gradient-to-br from-white/80 to-purple-50/80

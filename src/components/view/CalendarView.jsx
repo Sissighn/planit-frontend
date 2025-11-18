@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { HiDotsVertical, HiPlus } from "react-icons/hi";
 import DeleteRecurringDialog from "../tasks/DeleteRecurringDialog";
 
+import { getCompletedInstances } from "../../services/api.js";
+
 export default function CalendarView({
   tasks = [],
   onQuickAdd,
@@ -26,7 +28,7 @@ export default function CalendarView({
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   // -----------------------------------------------------
-  // TAG-KLICK
+  // DATE CLICK → OPEN POPUP
   // -----------------------------------------------------
   const handleDateClick = (info) => {
     const dateStr = info.dateStr;
@@ -39,7 +41,7 @@ export default function CalendarView({
   };
 
   // -----------------------------------------------------
-  // EVENTS GENERIEREN
+  // BUILD EVENTS ARRAY (Calendar rendering)
   // -----------------------------------------------------
   useEffect(() => {
     if (!Array.isArray(tasks)) return;
@@ -51,14 +53,12 @@ export default function CalendarView({
     async function buildEvents() {
       const completedMap = {};
 
-      // load completed instances for recurring tasks
+      // 1) LOAD COMPLETED INSTANCES FROM BACKEND
       await Promise.all(
         tasks.map(async (t) => {
           if (t.repeatFrequency && t.repeatFrequency !== "NONE") {
-            const res = await fetch(
-              `http://localhost:8080/api/tasks/${t.id}/completed-instances`
-            );
-            completedMap[t.id] = await res.json();
+            const arr = await getCompletedInstances(t.id);
+            completedMap[t.id] = Array.isArray(arr) ? arr : [];
           } else {
             completedMap[t.id] = [];
           }
@@ -77,26 +77,27 @@ export default function CalendarView({
 
         const isExcluded = (iso) => excludedSet.has(iso);
 
-        const days = Array.isArray(t.repeatDays)
+        const repeatDaysList = Array.isArray(t.repeatDays)
           ? t.repeatDays
           : (t.repeatDays || "").split(",").filter(Boolean);
 
         const end = t.repeatUntil ? new Date(t.repeatUntil) : oneYearLater;
         const completedDates = completedMap[t.id] || [];
 
-        // STARTDATE sauber bestimmen
         const start = t.startDate
           ? new Date(t.startDate)
           : t.deadline
           ? new Date(t.deadline)
           : new Date(today);
 
+        // -----------------------------------------------------
         // ONE-TIME TASK
+        // -----------------------------------------------------
         if (!t.repeatFrequency || t.repeatFrequency === "NONE") {
           if (t.deadline && !isExcluded(t.deadline)) {
             built.push({
               taskId: t.id,
-              date: t.nextOccurrence || t.deadline,
+              date: t.deadline,
               title: t.title,
               color: t.done ? "#82ebaf" : "#937ebc",
               task: t,
@@ -105,7 +106,9 @@ export default function CalendarView({
           continue;
         }
 
-        // RECURRING
+        // -----------------------------------------------------
+        // RECURRING TASKS
+        // -----------------------------------------------------
         const freq = t.repeatFrequency;
         const interval = Number(t.repeatInterval) || 1;
 
@@ -129,7 +132,7 @@ export default function CalendarView({
 
         // WEEKLY
         if (freq === "WEEKLY") {
-          const map = {
+          const dayCode = {
             MON: 1,
             TUE: 2,
             WED: 3,
@@ -143,9 +146,11 @@ export default function CalendarView({
 
           while (d <= end) {
             const iso = d.toISOString().split("T")[0];
-            const weekday = Object.keys(map).find((k) => map[k] === d.getDay());
+            const weekday = Object.keys(dayCode).find(
+              (k) => dayCode[k] === d.getDay()
+            );
 
-            if (days.includes(weekday) && !isExcluded(iso)) {
+            if (repeatDaysList.includes(weekday) && !isExcluded(iso)) {
               built.push({
                 taskId: t.id,
                 date: iso,
@@ -165,7 +170,8 @@ export default function CalendarView({
 
           while (d <= end) {
             const iso = d.toISOString().split("T")[0];
-            if (!isExcluded(iso)) {
+
+            if (d.getDate() === start.getDate() && !isExcluded(iso)) {
               built.push({
                 taskId: t.id,
                 date: iso,
@@ -174,6 +180,7 @@ export default function CalendarView({
                 task: t,
               });
             }
+
             d.setMonth(d.getMonth() + interval);
           }
         }
@@ -205,7 +212,7 @@ export default function CalendarView({
   }, [tasks]);
 
   // -----------------------------------------------------
-  // DELETE CLICK
+  // DELETE LOGIC
   // -----------------------------------------------------
   const handleDeleteClick = (ev) => {
     const task = ev.task;
