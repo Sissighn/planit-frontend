@@ -1,4 +1,3 @@
-// src/api/tasks.js
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 const API_URL = `${BASE_URL}/api/tasks`;
 
@@ -13,7 +12,6 @@ async function jsonOrThrow(res) {
     err.status = res.status;
     throw err;
   }
-  // Some endpoints may return empty body
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }
@@ -62,5 +60,46 @@ export async function clearCompleted() {
 
 export async function sortTasksBy(by = "priority") {
   const res = await fetch(`${API_URL}/sorted?by=${encodeURIComponent(by)}`);
+  return jsonOrThrow(res);
+}
+
+// ------------------------------------------------------------
+//  RECURRING: completed instances
+// ------------------------------------------------------------
+
+export async function getCompletedInstances(taskId) {
+  const res = await fetch(`${API_URL}/${taskId}/completed-instances`);
+  return jsonOrThrow(res); // returns ["2025-02-15", ...]
+}
+
+export async function markInstanceCompleted(taskId, date) {
+  const res = await fetch(`${API_URL}/${taskId}/complete/${date}`, {
+    method: "POST",
+  });
+  return jsonOrThrow(res);
+}
+
+// ------------------------------------------------------------
+//  RECURRING: delete logic
+// ------------------------------------------------------------
+
+export async function deleteOneOccurrence(taskId, date) {
+  const res = await fetch(`${API_URL}/${taskId}/exclude/${date}`, {
+    method: "POST",
+  });
+  return jsonOrThrow(res);
+}
+
+export async function deleteFutureOccurrences(taskId, date) {
+  const res = await fetch(`${API_URL}/${taskId}/delete-future/${date}`, {
+    method: "PATCH",
+  });
+  return jsonOrThrow(res);
+}
+
+export async function deleteSeries(taskId) {
+  const res = await fetch(`${API_URL}/${taskId}/delete-series`, {
+    method: "DELETE",
+  });
   return jsonOrThrow(res);
 }

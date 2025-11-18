@@ -16,15 +16,15 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
   const [repeatInterval, setRepeatInterval] = useState(1);
   const [repeatUntil, setRepeatUntil] = useState("");
 
+  const [startDate, setStartDate] = useState("");
+
   useEffect(() => {
-    // Load groups
     fetch("http://localhost:8080/api/groups")
       .then((res) => res.json())
       .then(setGroups)
       .catch(console.error);
   }, []);
 
-  // 🔥 PRESET DEADLINE vom Kalender verwenden
   useEffect(() => {
     if (presetDate) {
       setDeadline(presetDate);
@@ -44,6 +44,7 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
       repeatDays: repeatDays.join(","),
       repeatInterval,
       repeatUntil: repeatUntil || null,
+      startDate: repeatFrequency !== "NONE" ? startDate || null : null,
     });
 
     onClose();
@@ -70,7 +71,6 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
           New Task
         </h2>
 
-        {/* Title */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Title</label>
           <input
@@ -82,7 +82,6 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
           />
         </div>
 
-        {/* Deadline */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Deadline</label>
           <input
@@ -93,7 +92,6 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
           />
         </div>
 
-        {/* Time */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Time</label>
           <input
@@ -104,7 +102,6 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
           />
         </div>
 
-        {/* Priority */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Priority</label>
           <select
@@ -119,7 +116,6 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
           </select>
         </div>
 
-        {/* Group */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Group</label>
           <select
@@ -136,7 +132,6 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
           </select>
         </div>
 
-        {/* Repeat Section */}
         <RepeatSection
           repeatFrequency={repeatFrequency}
           setRepeatFrequency={setRepeatFrequency}
@@ -148,7 +143,18 @@ export default function AddTaskDialog({ onAdd, onClose, presetDate }) {
           setRepeatUntil={setRepeatUntil}
         />
 
-        {/* Buttons */}
+        {repeatFrequency !== "NONE" && (
+          <div className="flex flex-col gap-1">
+            <label className={labelClass}>Start date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+        )}
+
         <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"

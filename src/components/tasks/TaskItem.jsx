@@ -24,6 +24,11 @@ export default function TaskItem({
       ? "text-yellow-400"
       : "text-gray-400";
 
+  const displayDate =
+    task.repeatFrequency && task.repeatFrequency !== "NONE"
+      ? task.nextOccurrence || task.deadline
+      : task.deadline || null;
+
   const openConfirm = (type) => {
     if (type === "delete") {
       setConfirmMeta({
@@ -61,7 +66,6 @@ export default function TaskItem({
         isActive ? "task-item-active" : ""
       }`}
     >
-      {/* 🔹 Main Task Row */}
       <div className="flex justify-between items-center">
         <div
           onClick={() => onSelect(task.id)}
@@ -73,27 +77,24 @@ export default function TaskItem({
             }`}
           >
             {task.title}
-          </span>{" "}
-          {/* 🔹 Priority und/oder Datum anzeigen */}
-          {(task.priority || task.deadline) && (
+          </span>
+
+          {(task.priority || displayDate) && (
             <span className="ml-2 inline-flex items-center gap-2 text-gray-500 text-sm">
-              {/* Priority */}
               {task.priority && (
-                <span className={`${priorityColor}`}>({task.priority})</span>
+                <span className={priorityColor}>({task.priority})</span>
               )}
 
-              {/* Date */}
-              {task.deadline && (
+              {displayDate && (
                 <span className="text-gray-500">
-                  {new Date(task.deadline).toLocaleDateString("de-DE", {
+                  {new Date(displayDate).toLocaleDateString("de-DE", {
                     day: "2-digit",
                     month: "short",
                   })}
                 </span>
               )}
 
-              {/* Recurrence */}
-              {task.repeatFrequency !== "NONE" && (
+              {task.repeatFrequency && task.repeatFrequency !== "NONE" && (
                 <span className="inline-flex items-center gap-1 text-gray-500 text-xs">
                   <span className="material-symbols-outlined text-[15px] leading-none">
                     repeat
@@ -124,7 +125,6 @@ export default function TaskItem({
         </div>
       </div>
 
-      {/* 🔸 Inline Options Panel */}
       <div
         className={`option-panel ${isActive ? "open" : ""} 
                     bg-gradient-to-br from-white/80 to-purple-50/80
@@ -144,7 +144,7 @@ export default function TaskItem({
           className="flex items-center gap-1 text-slate-700 hover:text-purple-700 transition-all"
         >
           <span className="material-symbols-outlined text-2xl">archive</span>
-          <span className="font-cormorant text-sm">Archive</span>
+          <span className="font-medium text-sm">Archive</span>
         </button>
 
         <button
@@ -156,7 +156,6 @@ export default function TaskItem({
         </button>
       </div>
 
-      {/* 🧊 ConfirmDialog */}
       <ConfirmDialog
         open={confirmOpen}
         title={confirmMeta?.title}

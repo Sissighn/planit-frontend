@@ -13,18 +13,27 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
   const [repeatInterval, setRepeatInterval] = useState(1);
   const [repeatUntil, setRepeatUntil] = useState("");
 
+  const [startDate, setStartDate] = useState("");
+
   useEffect(() => {
     if (!task) return;
 
-    setTitle(task.title);
+    setTitle(task.title || "");
     setDeadline(task.deadline || "");
     setTime(task.time || "");
     setPriority(task.priority || "");
 
     setRepeatFrequency(task.repeatFrequency || "NONE");
-    setRepeatDays(task.repeatDays ? task.repeatDays.split(",") : []);
+    setRepeatDays(
+      task.repeatDays
+        ? Array.isArray(task.repeatDays)
+          ? task.repeatDays
+          : task.repeatDays.split(",")
+        : []
+    );
     setRepeatInterval(task.repeatInterval || 1);
     setRepeatUntil(task.repeatUntil || "");
+    setStartDate(task.startDate || "");
   }, [task]);
 
   const handleSubmit = (e) => {
@@ -34,12 +43,13 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
       ...task,
       title,
       deadline: deadline || null,
-      time,
+      time: time || null,
       priority: priority || null,
       repeatFrequency,
       repeatDays: repeatDays.join(","),
       repeatInterval,
       repeatUntil: repeatUntil || null,
+      startDate: repeatFrequency !== "NONE" ? startDate || null : null,
     });
 
     onClose();
@@ -66,7 +76,6 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
           Edit Task
         </h2>
 
-        {/* Title */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Title</label>
           <input
@@ -77,7 +86,6 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
           />
         </div>
 
-        {/* Deadline */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Deadline</label>
           <input
@@ -88,7 +96,6 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
           />
         </div>
 
-        {/* Time */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Time</label>
           <input
@@ -99,7 +106,6 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
           />
         </div>
 
-        {/* Priority */}
         <div className="flex flex-col gap-1">
           <label className={labelClass}>Priority</label>
           <select
@@ -114,7 +120,6 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
           </select>
         </div>
 
-        {/* Repeat Section */}
         <RepeatSection
           repeatFrequency={repeatFrequency}
           setRepeatFrequency={setRepeatFrequency}
@@ -126,7 +131,18 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
           setRepeatUntil={setRepeatUntil}
         />
 
-        {/* Buttons */}
+        {repeatFrequency !== "NONE" && (
+          <div className="flex flex-col gap-1">
+            <label className={labelClass}>Start date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+        )}
+
         <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"

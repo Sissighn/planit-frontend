@@ -12,222 +12,67 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   const [presetDate, setPresetDate] = useState(null);
   const [showArchive, setShowArchive] = useState(false);
   const [archivedCount, setArchivedCount] = useState(0);
-  const visibleTasks = tasks.filter(isTaskVisibleToday);
 
   const baseUrl = "http://localhost:8080/api/tasks";
 
-  // -----------------------------------------------------
-  // FETCH ALL TASKS
-  // -----------------------------------------------------
   const fetchTasks = async (archived = false) => {
     try {
       const url = archived ? `${baseUrl}/archive` : baseUrl;
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Fehler beim Laden der Tasks");
-
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setTasks(data);
       onTasksUpdate?.(data);
-    } catch (err) {
-      console.error("❌ Fehler beim Laden der Tasks:", err);
-    }
+    } catch (_) {}
   };
 
-  const fetchTodayTasks = async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      const res = await fetch(`${baseUrl}/today`);
-      if (!res.ok) throw new Error("Failed to load today's tasks");
-      const data = await res.json();
-      setTasks(data);
-      onTasksUpdate?.(data);
-    } catch (err) {
-      console.error("❌ Fehler beim Laden der 'heute fälligen' Tasks:", err);
-    }
-  };
-
-  // -----------------------------------------------------
-  // QUICK-ADD FROM CALENDAR
-  // -----------------------------------------------------
-  const handleQuickAdd = (date) => {
-    setPresetDate(date);
-    setShowAddDialog(true);
-  };
-
-  // -----------------------------------------------------
-  // ARCHIVE TASK
-  // -----------------------------------------------------
-  const handleArchive = async (id) => {
-    try {
-      const res = await fetch(`${baseUrl}/${id}/archive`, { method: "POST" });
-      if (!res.ok) throw new Error("Archivieren fehlgeschlagen");
-
-      await fetchTasks();
-      await fetchArchivedCount();
-    } catch (err) {
-      console.error("❌ Fehler beim Archivieren:", err);
-    }
-  };
-
-  // -----------------------------------------------------
-  // EDIT TASK
-  // -----------------------------------------------------
-  const handleEdit = async (updatedTask) => {
-    try {
-      const res = await fetch(`${baseUrl}/${updatedTask.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedTask),
-      });
-
-      if (!res.ok) throw new Error("Bearbeiten fehlgeschlagen");
-
-      await fetchTasks(showArchive);
-      setShowEditDialog(false);
-      setSelectedTask(null);
-    } catch (err) {
-      console.error("❌ Fehler beim Bearbeiten:", err);
-    }
-  };
-
-  // -----------------------------------------------------
-  // ARCHIVED COUNT
-  // -----------------------------------------------------
   const fetchArchivedCount = async () => {
     try {
       const res = await fetch(`${baseUrl}/archive`);
-      if (!res.ok) throw new Error("Fehler beim Laden der Archiv-Anzahl");
-
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setArchivedCount(data.length);
-    } catch (err) {
-      console.error("❌ Fehler beim Laden der Archiv-Anzahl:", err);
-    }
+    } catch (_) {}
   };
 
-  // -----------------------------------------------------
-  // DELETE: ONLY THIS OCCURRENCE
-  // -----------------------------------------------------
-  const quickDeleteOne = async (task, date) => {
-    try {
-      const res = await fetch(`${baseUrl}/${task.id}/exclude-date`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date }),
-      });
-
-      if (!res.ok) throw new Error("Couldn't delete single occurrence");
-
-      await fetchTasks(showArchive);
-    } catch (err) {
-      console.error("❌ quickDeleteOne error:", err);
-      alert("Error deleting this event.");
-    }
-  };
-
-  // -----------------------------------------------------
-  // DELETE: THIS + FUTURE
-  // -----------------------------------------------------
-  const quickDeleteFuture = async (task, date) => {
-    try {
-      // date - 1 day
-      const endDate = new Date(date);
-      endDate.setDate(endDate.getDate() - 1);
-
-      const formatted = endDate.toISOString().split("T")[0];
-
-      const updated = {
-        ...task,
-        repeatUntil: formatted,
-      };
-
-      const res = await fetch(`${baseUrl}/${task.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
-      });
-
-      if (!res.ok) throw new Error("Couldn't delete future occurrences");
-
-      await fetchTasks(showArchive);
-    } catch (err) {
-      console.error("❌ quickDeleteFuture error:", err);
-      alert("Error deleting future events.");
-    }
-  };
-
-  // -----------------------------------------------------
-  // DELETE: ENTIRE SERIES
-  // -----------------------------------------------------
-  const quickDeleteSeries = async (id) => {
-    try {
-      const res = await fetch(`${baseUrl}/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) throw new Error("Couldn't delete full series");
-
-      await fetchTasks(showArchive);
-    } catch (err) {
-      console.error("❌ quickDeleteSeries error:", err);
-      alert("Error deleting task series.");
-    }
-  };
-
-  // -----------------------------------------------------
-  // INITIAL LOAD
-  // -----------------------------------------------------
   useEffect(() => {
-    fetchTasks(false); // active tasks
+    fetchTasks(false);
     fetchArchivedCount();
   }, []);
-  // -----------------------------------------------------
-  // SIDEBAR COMMANDS
-  // -----------------------------------------------------
+
   useImperativeHandle(ref, () => ({
     openAdd: () => {
-      setPresetDate(null); // reset preset date
+      setPresetDate(null);
       setShowAddDialog(true);
     },
-
     quickAdd: (date) => {
       setPresetDate(date);
       setShowAddDialog(true);
     },
-
     quickEdit: (task) => {
       setSelectedTask(task);
       setShowEditDialog(true);
     },
-
     quickDelete: async (id) => {
       await handleDelete(id);
     },
-
     quickArchive: async (id) => {
       await handleArchive(id);
     },
-
     showArchiveView: async () => {
       setShowArchive(true);
       await fetchTasks(true);
     },
-
     showHomeView: async () => {
       setShowArchive(false);
       await fetchTasks(false);
     },
-
     quickDeleteOne: (task, date) => quickDeleteOne(task, date),
     quickDeleteFuture: (task, date) => quickDeleteFuture(task, date),
     quickDeleteSeries: (id) => quickDeleteSeries(id),
-
     isArchiveView: () => showArchive,
   }));
 
-  // -----------------------------------------------------
-  // ADD TASK HANDLER
-  // -----------------------------------------------------
   const handleAdd = async (taskData) => {
     try {
       const res = await fetch(baseUrl, {
@@ -235,47 +80,102 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(taskData),
       });
-
-      if (!res.ok) throw new Error("Add fehlgeschlagen");
-
+      if (!res.ok) throw new Error();
       await fetchTasks(showArchive);
       setShowAddDialog(false);
-      setPresetDate(null); // cleanup
-    } catch (err) {
-      console.error("❌ Fehler beim Hinzufügen:", err);
-    }
+      setPresetDate(null);
+    } catch (_) {}
   };
 
-  // -----------------------------------------------------
-  // TOGGLE TASK
-  // -----------------------------------------------------
-  const handleToggle = async (id) => {
-    const task = tasks.find((t) => t.id === id);
-    if (!task) return;
-
-    const endpoint = task.done ? "undone" : "done";
-
-    await fetch(`${baseUrl}/${id}/${endpoint}`, { method: "PUT" });
-    await fetchTasks(showArchive);
+  const handleEdit = async (updatedTask) => {
+    try {
+      const res = await fetch(`${baseUrl}/${updatedTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedTask),
+      });
+      if (!res.ok) throw new Error();
+      await fetchTasks(showArchive);
+      setShowEditDialog(false);
+      setSelectedTask(null);
+    } catch (_) {}
   };
 
-  // -----------------------------------------------------
-  // DELETE TASK
-  // -----------------------------------------------------
+  const handleArchive = async (id) => {
+    try {
+      const res = await fetch(`${baseUrl}/${id}/archive`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      await fetchTasks();
+      await fetchArchivedCount();
+    } catch (_) {}
+  };
+
   const handleDelete = async (id) => {
     try {
       await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
       await fetchTasks(showArchive);
-
       if (selectedTask?.id === id) setSelectedTask(null);
-    } catch (err) {
-      console.error("❌ Fehler beim Löschen:", err);
-    }
+    } catch (_) {}
   };
 
-  // -----------------------------------------------------
-  // DASHBOARD STATS
-  // -----------------------------------------------------
+  const quickDeleteOne = async (task, date) => {
+    try {
+      const res = await fetch(`${baseUrl}/${task.id}/exclude-date`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date }),
+      });
+      if (!res.ok) throw new Error();
+      await fetchTasks(showArchive);
+    } catch (_) {}
+  };
+
+  const quickDeleteFuture = async (task, date) => {
+    try {
+      const endDate = new Date(date);
+      endDate.setDate(endDate.getDate() - 1);
+      const formatted = endDate.toISOString().split("T")[0];
+      const updated = { ...task, repeatUntil: formatted };
+
+      const res = await fetch(`${baseUrl}/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      if (!res.ok) throw new Error();
+      await fetchTasks(showArchive);
+    } catch (_) {}
+  };
+
+  const quickDeleteSeries = async (id) => {
+    try {
+      const res = await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      await fetchTasks(showArchive);
+    } catch (_) {}
+  };
+
+  const handleToggle = async (id) => {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+
+    const today = new Date().toISOString().split("T")[0];
+
+    try {
+      if (task.repeatFrequency && task.repeatFrequency !== "NONE") {
+        await fetch(`${baseUrl}/${id}/complete/${today}`, { method: "POST" });
+        const endpoint = task.done ? "undone" : "done";
+        await fetch(`${baseUrl}/${id}/${endpoint}`, { method: "PUT" });
+      } else {
+        const endpoint = task.done ? "undone" : "done";
+        await fetch(`${baseUrl}/${id}/${endpoint}`, { method: "PUT" });
+      }
+      await fetchTasks(showArchive);
+    } catch (_) {}
+  };
+
+  const visibleTasks = tasks.filter((t) => !t.archived);
+
   const stats = !showArchive
     ? {
         dueToday: tasks.filter((t) => {
@@ -283,7 +183,6 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
           const today = new Date().toISOString().split("T")[0];
           return t.deadline.startsWith(today);
         }).length,
-
         completedThisWeek: tasks.filter((t) => {
           if (!t.done || t.archived) return false;
           const updated = new Date(t.updatedAt || Date.now());
@@ -291,40 +190,15 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
           const weekAgo = new Date(now.setDate(now.getDate() - 7));
           return updated >= weekAgo;
         }).length,
-
         archived: archivedCount,
       }
     : null;
-  function isTaskVisibleToday(task) {
-    const todayISO = new Date().toISOString().split("T")[0];
 
-    if (task.archived) return false;
-
-    // 1. Tasks ohne Datum → immer sichtbar
-    if (!task.deadline) return true;
-
-    // 2. Overdue → sichtbar
-    if (task.deadline < todayISO) return true;
-
-    // 3. Deadline heute → sichtbar
-    if (task.deadline === todayISO) return true;
-
-    // 4. Recurring → immer sichtbar (zeigt nächste Instanz mit Datum)
-    if (task.repeatFrequency !== "NONE") return true;
-
-    return false;
-  }
-
-  // -----------------------------------------------------
-  // RENDER
-  // -----------------------------------------------------
   return (
     <div className="text-gray-800">
       <div className="max-w-3xl mx-auto w-full flex flex-col gap-8">
-        {/* Dashboard */}
         {stats && <Dashboard stats={stats} />}
 
-        {/* Task List */}
         <TaskList
           tasks={visibleTasks}
           onToggle={handleToggle}
@@ -335,15 +209,14 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
         />
       </div>
 
-      {/* Add Task Dialog */}
       {showAddDialog && (
         <AddTaskDialog
           onAdd={handleAdd}
           onClose={() => setShowAddDialog(false)}
-          presetDate={presetDate} // <-- 🔥 Wichtig!
+          presetDate={presetDate}
         />
       )}
-      {/* Edit Task Dialog */}
+
       {showEditDialog && selectedTask && (
         <EditTaskDialog
           task={selectedTask}

@@ -20,19 +20,16 @@ export default function CalendarView({
   const [selectedDate, setSelectedDate] = useState(null);
   const [dayEvents, setDayEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
-
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
 
-  // Für recurring delete dialog
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null); // { task, date }
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   // -----------------------------------------------------
-  // DATE CLICK → OPEN POPUP
+  // TAG-KLICK
   // -----------------------------------------------------
   const handleDateClick = (info) => {
     const dateStr = info.dateStr;
-
     const eventsOnDay = events.filter((ev) => ev.date === dateStr);
 
     setSelectedDate(dateStr);
@@ -42,59 +39,73 @@ export default function CalendarView({
   };
 
   // -----------------------------------------------------
-  // GENERATE EVENTS
+  // EVENTS GENERIEREN
   // -----------------------------------------------------
   useEffect(() => {
     if (!Array.isArray(tasks)) return;
 
     const today = new Date();
-    const oneYearLater = new Date(today);
+    const oneYearLater = new Date();
     oneYearLater.setFullYear(today.getFullYear() + 1);
 
-    const built = [];
+    async function buildEvents() {
+      const completedMap = {};
 
-    tasks.forEach((t) => {
-      // === NEW: excludedDates-Set vorbereiten ===
-      const excludedSet = new Set(
-        (t.excludedDates || "")
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean) // filter out ""
+      // load completed instances for recurring tasks
+      await Promise.all(
+        tasks.map(async (t) => {
+          if (t.repeatFrequency && t.repeatFrequency !== "NONE") {
+            const res = await fetch(
+              `http://localhost:8080/api/tasks/${t.id}/completed-instances`
+            );
+            completedMap[t.id] = await res.json();
+          } else {
+            completedMap[t.id] = [];
+          }
+        })
       );
 
-      const isExcluded = (isoDate) => excludedSet.has(isoDate);
+      const built = [];
 
-      // repeatDays: "MON,TUE" oder Array
-      const days = Array.isArray(t.repeatDays)
-        ? t.repeatDays
-        : (t.repeatDays || "").split(",").filter(Boolean);
+      for (const t of tasks) {
+        const excludedSet = new Set(
+          (t.excludedDates || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        );
 
-      const start = t.deadline
-        ? new Date(t.deadline)
-        : new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const isExcluded = (iso) => excludedSet.has(iso);
 
-      const end = t.repeatUntil ? new Date(t.repeatUntil) : oneYearLater;
+        const days = Array.isArray(t.repeatDays)
+          ? t.repeatDays
+          : (t.repeatDays || "").split(",").filter(Boolean);
 
-      // -------------------------------------------------
-      // ONE-TIME TASK
-      // -------------------------------------------------
-      if (t.deadline && (t.repeatFrequency === "NONE" || !t.repeatFrequency)) {
-        const iso = t.deadline; // already yyyy-MM-dd vom Backend
-        if (!isExcluded(iso)) {
-          built.push({
-            title: t.title,
-            date: iso,
-            color: t.done ? "#82ebaf" : "#937ebc",
-            task: t,
-            extendedProps: { time: t.time || null },
-          });
+        const end = t.repeatUntil ? new Date(t.repeatUntil) : oneYearLater;
+        const completedDates = completedMap[t.id] || [];
+
+        // STARTDATE sauber bestimmen
+        const start = t.startDate
+          ? new Date(t.startDate)
+          : t.deadline
+          ? new Date(t.deadline)
+          : new Date(today);
+
+        // ONE-TIME TASK
+        if (!t.repeatFrequency || t.repeatFrequency === "NONE") {
+          if (t.deadline && !isExcluded(t.deadline)) {
+            built.push({
+              taskId: t.id,
+              date: t.nextOccurrence || t.deadline,
+              title: t.title,
+              color: t.done ? "#82ebaf" : "#937ebc",
+              task: t,
+            });
+          }
+          continue;
         }
-      }
 
-      // -------------------------------------------------
-      // RECURRING TASKS
-      // -------------------------------------------------
-      if (t.repeatFrequency && t.repeatFrequency !== "NONE") {
+        // RECURRING
         const freq = t.repeatFrequency;
         const interval = Number(t.repeatInterval) || 1;
 
@@ -105,11 +116,11 @@ export default function CalendarView({
             const iso = d.toISOString().split("T")[0];
             if (!isExcluded(iso)) {
               built.push({
-                title: t.title,
+                taskId: t.id,
                 date: iso,
-                color: "#c084fc",
+                title: t.title,
+                color: completedDates.includes(iso) ? "#82ebaf" : "#c084fc",
                 task: t,
-                extendedProps: { time: t.time || null },
               });
             }
             d.setDate(d.getDate() + interval);
@@ -129,19 +140,21 @@ export default function CalendarView({
           };
 
           let d = new Date(start);
-          while (d <= end) {
-            const code = Object.keys(map).find((k) => map[k] === d.getDay());
-            const iso = d.toISOString().split("T")[0];
 
-            if (days.includes(code) && !isExcluded(iso)) {
+          while (d <= end) {
+            const iso = d.toISOString().split("T")[0];
+            const weekday = Object.keys(map).find((k) => map[k] === d.getDay());
+
+            if (days.includes(weekday) && !isExcluded(iso)) {
               built.push({
-                title: t.title,
+                taskId: t.id,
                 date: iso,
-                color: "#f9a8d4",
+                title: t.title,
+                color: completedDates.includes(iso) ? "#82ebaf" : "#f9a8d4",
                 task: t,
-                extendedProps: { time: t.time || null },
               });
             }
+
             d.setDate(d.getDate() + 1);
           }
         }
@@ -149,15 +162,16 @@ export default function CalendarView({
         // MONTHLY
         if (freq === "MONTHLY") {
           let d = new Date(start);
+
           while (d <= end) {
             const iso = d.toISOString().split("T")[0];
             if (!isExcluded(iso)) {
               built.push({
-                title: t.title,
+                taskId: t.id,
                 date: iso,
-                color: "#ffec81",
+                title: t.title,
+                color: completedDates.includes(iso) ? "#82ebaf" : "#ffec81",
                 task: t,
-                extendedProps: { time: t.time || null },
               });
             }
             d.setMonth(d.getMonth() + interval);
@@ -167,28 +181,31 @@ export default function CalendarView({
         // YEARLY
         if (freq === "YEARLY") {
           let d = new Date(start);
+
           while (d <= end) {
             const iso = d.toISOString().split("T")[0];
             if (!isExcluded(iso)) {
               built.push({
-                title: t.title,
+                taskId: t.id,
                 date: iso,
-                color: "#60a5fa",
+                title: t.title,
+                color: completedDates.includes(iso) ? "#82ebaf" : "#60a5fa",
                 task: t,
-                extendedProps: { time: t.time || null },
               });
             }
             d.setFullYear(d.getFullYear() + interval);
           }
         }
       }
-    });
 
-    setEvents(built);
+      setEvents(built);
+    }
+
+    buildEvents();
   }, [tasks]);
 
   // -----------------------------------------------------
-  // HELPER: DELETE CLICK FROM MENU
+  // DELETE CLICK
   // -----------------------------------------------------
   const handleDeleteClick = (ev) => {
     const task = ev.task;
@@ -196,14 +213,12 @@ export default function CalendarView({
       task?.repeatFrequency && task.repeatFrequency !== "NONE";
 
     if (!isRecurring) {
-      // normal delete
       setShowModal(false);
       setOpenMenuIndex(null);
       onQuickDelete?.(task.id);
       return;
     }
 
-    // recurring: dialog öffnen
     setDeleteTarget({ task, date: ev.date });
     setShowDeleteDialog(true);
   };
@@ -228,7 +243,7 @@ export default function CalendarView({
         }}
       />
 
-      {/* MODAL POPUP FOR DAY */}
+      {/* POPUP */}
       {showModal && (
         <div
           className="fixed inset-0 bg-purple-200/30 backdrop-blur-md flex justify-center items-center z-[99999]"
@@ -243,13 +258,11 @@ export default function CalendarView({
                        p-6 w-[380px] space-y-4 animate-modalPop"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* HEADER */}
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold text-purple-700">
                 {selectedDate}
               </h2>
 
-              {/* Add icon */}
               <button
                 onClick={() => {
                   setShowModal(false);
@@ -261,14 +274,12 @@ export default function CalendarView({
               </button>
             </div>
 
-            {/* NO TASKS */}
             {dayEvents.length === 0 && (
               <p className="text-gray-600 text-sm text-center mt-2">
                 No tasks for this day.
               </p>
             )}
 
-            {/* TASK LIST */}
             <div className="space-y-2">
               {dayEvents.map((ev, i) => (
                 <div
@@ -276,16 +287,9 @@ export default function CalendarView({
                   className="p-3 rounded-xl border border-purple-200 bg-white shadow-inner relative"
                 >
                   <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-purple-800 text-sm">
-                        {ev.title}
-                      </p>
-                      {ev.extendedProps?.time && (
-                        <p className="text-xs text-gray-600">
-                          {ev.extendedProps.time}
-                        </p>
-                      )}
-                    </div>
+                    <p className="font-medium text-purple-800 text-sm">
+                      {ev.title}
+                    </p>
 
                     <div className="relative">
                       <button
@@ -309,6 +313,7 @@ export default function CalendarView({
                           >
                             Edit
                           </button>
+
                           <button
                             onClick={() => {
                               setShowModal(false);
@@ -319,9 +324,10 @@ export default function CalendarView({
                           >
                             Archive
                           </button>
+
                           <button
                             onClick={() => handleDeleteClick(ev)}
-                            className="w-full text-left px-3 py-2 hover:bg-gray-100 text-red-500"
+                            className="w-full text-left px-3 py-2 text-red-500 hover:bg-gray-100"
                           >
                             Delete
                           </button>
@@ -333,7 +339,6 @@ export default function CalendarView({
               ))}
             </div>
 
-            {/* CLOSE */}
             <div className="flex justify-end mt-3">
               <button
                 onClick={() => {
