@@ -1,1 +1,1 @@
-![Tests](https://github.com/DEIN_USERNAME/planit-frontend/actions/workflows/tests.yml/badge.svg)
+![CI](https://github.com/Sissighn/planit-frontend/actions/workflows/ci.yml/badge.svg)
