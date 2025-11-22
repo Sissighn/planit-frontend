@@ -12,14 +12,12 @@ export default function TaskList({
 }) {
   const [activeTaskId, setActiveTaskId] = useState(null);
 
-  // Sync activeTaskId with selectedTask prop
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+
   useEffect(() => {
-    setActiveTaskId(selectedTask?.id || null);
+    setActiveTaskId(selectedTask ?? null);
   }, [selectedTask]);
 
-  // -----------------------------------------------------
-  // KLICK AUSSERHALB SCHLIESST ACTIVE TASK
-  // -----------------------------------------------------
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest(".task-item-container")) {
@@ -28,26 +26,20 @@ export default function TaskList({
       }
     };
 
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onSelect]);
 
-  // -----------------------------------------------------
-  // WENN TASK GELÖSCHT/ARCHIVIERT IST → PANEL SCHLIESSEN
-  // -----------------------------------------------------
   useEffect(() => {
-    if (!tasks.some((t) => t.id === activeTaskId)) {
+    if (!safeTasks.some((t) => t.id === activeTaskId)) {
       setActiveTaskId(null);
       onSelect?.(null);
     }
-  }, [tasks, activeTaskId, onSelect]);
+  }, [safeTasks, activeTaskId, onSelect]);
 
-  // -----------------------------------------------------
-  // RENDER
-  // -----------------------------------------------------
   return (
     <div>
-      {tasks
+      {safeTasks
         .slice()
         .sort((a, b) => {
           const da =
@@ -60,9 +52,9 @@ export default function TaskList({
               ? b.nextOccurrence
               : b.deadline;
 
-          if (da == null && db == null) return 0;
-          if (da == null) return 1;
-          if (db == null) return -1;
+          if (!da && !db) return 0;
+          if (!da) return 1;
+          if (!db) return -1;
 
           return da.localeCompare(db);
         })
