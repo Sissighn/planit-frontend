@@ -1,16 +1,106 @@
-# React + Vite
+# PlanIt Frontend
+[![CI](https://github.com/Sissighn/planit-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/Sissighn/planit-frontend/actions/workflows/ci.yml)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains the frontend for the PlanIt application, a task and time management tool built to support recurring tasks, calendar-based planning, and flexible categorization.  
+The frontend is implemented using React, Vite, and TailwindCSS and communicates with the PlanIt backend API.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Create, update, delete and archive tasks  
+- Support for recurring tasks with multiple repetition rules  
+- Calendar view with quick add, edit and delete actions  
+- Category and group-based task filtering  
+- Soft UI design using TailwindCSS and DaisyUI  
+- Responsive layout and mobile-friendly interface  
+- Integration with backend REST API  
+- Jest + React Testing Library test setup  
+- Continuous Integration via GitHub Actions  
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React  
+- Vite  
+- TailwindCSS  
+- DaisyUI  
+- Jest  
+- React Testing Library  
+- GitHub Actions  
+- Codecov  
+
+---
+
+## Project Structure
+```bash
+planit-frontend
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── ConfirmDialog.jsx
+│   │   │   └── ThemeSwitch.jsx
+│   │   ├── groups/
+│   │   ├── layout/
+│   │   │   ├── AppContent.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── DashboardLayout.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Sidebar.jsx
+│   │   └── tasks/
+│   │       ├── AddTaskDialog.jsx
+│   │       ├── EditTaskDialog.jsx
+│   │       ├── TaskItem.jsx
+│   │       └── TaskList.jsx
+│   ├── view/
+│   │   ├── CalendarView.jsx
+│   │   └── Greeting.jsx
+│   ├── services/
+│   │   └── api.js
+│   ├── utils/
+│   │   └── recurrence.js
+│   ├── App.css
+│   ├── App.jsx
+│   ├── index.css
+│   └── main.jsx
+├── jest.config.cjs
+├── tailwind.config.js
+├── vite.config.js
+└── package.json
+
+```
+--- 
+
+## Installation
+
+```bash
+git clone https://github.com/Sissighn/planit-frontend.git
+npm install
+npm run dev
+npm run build
+npm run preview
+```
+---
+
+## Running Tests
+```bash
+npm test
+```
+
+---
+
+## API Integration
+
+All requests to the backend are handled in src/services/api.js.
+The frontend expects the PlanIt backend application to be running and exposing the required REST endpoints.
+
+---
+
+## License
+MIT License © 2025 Setayesh Golshan
