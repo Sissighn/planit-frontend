@@ -114,3 +114,35 @@ export async function deleteSeries(taskId) {
   });
   return jsonOrThrow(res);
 }
+
+// ------------------------------------------------------------
+//  GROUPS
+// ------------------------------------------------------------
+
+export async function getGroups() {
+  const res = await fetch(`${BASE_URL}/api/groups`);
+  return jsonOrThrow(res);
+}
+
+export async function addGroup(groupData) {
+  const res = await fetch(`${BASE_URL}/api/groups`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(groupData),
+  });
+  return jsonOrThrow(res);
+}
+
+export async function updateGroup(id, groupData) {
+  const res = await fetch(`${BASE_URL}/api/groups/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(groupData),
+  });
+  return jsonOrThrow(res);
+}
+
+export async function deleteGroup(id) {
+  const res = await fetch(`${BASE_URL}/api/groups/${id}`, { method: "DELETE" });
+  return jsonOrThrow(res);
+}

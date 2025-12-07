@@ -226,7 +226,7 @@ const AppContent = forwardRef(function AppContent({ onTasksUpdate }, ref) {
   // RENDER
   // ---------------------------------------------------------
   return (
-    <div className="text-gray-800">
+    <div>
       <div className="max-w-3xl mx-auto w-full flex flex-col gap-8">
         {stats && <Dashboard stats={stats} />}
 

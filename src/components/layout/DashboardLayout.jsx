@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import Sidebar from "./Sidebar";
 import AppContent from "./AppContent";
 import CalendarView from "../view/CalendarView";
+import ThemeSwitch from "../common/ThemeSwitch";
 
 export default function DashboardLayout() {
   const appRef = useRef(null);
@@ -32,8 +33,12 @@ export default function DashboardLayout() {
   const handleCalendarClick = () => setActiveView("calendar");
 
   const handleSelectGroup = (groupId) => {
-    setSelectedCategoryId(groupId);
-    setActiveView("home");
+    // Allow toggling selection
+    setSelectedCategoryId((prev) => (prev === groupId ? null : groupId));
+    // Switch to home view if a category is selected and we are not there
+    if (activeView !== "home") {
+      setActiveView("home");
+    }
   };
 
   return (
@@ -45,26 +50,30 @@ export default function DashboardLayout() {
         onCalendarClick={handleCalendarClick}
         onSelectGroup={handleSelectGroup}
         activeView={activeView}
+        selectedCategoryId={selectedCategoryId}
       />
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col bg-white/70 backdrop-blur-md">
-        <header className="p-6 border-b border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100">
-          <h1 className="text-3xl font-dms text-soft-purple tracking-wide">
-            <strong>Dashboard Overview</strong>
-          </h1>
-          <p className="text-slate-600 mt-1">
-            {activeView === "archive"
-              ? "Viewing archived tasks"
-              : activeView === "calendar"
-              ? "Calendar view"
-              : selectedCategoryId
-              ? "Tasks in selected category"
-              : "Your active tasks at a glance"}
-          </p>
+      <div className="flex-1 flex flex-col bg-slate-100 dark:bg-slate-800">
+        <header className="p-6 flex justify-between items-center bg-slate-100 shadow-[5px_5px_10px_#d1d9e6,_-5px_-5px_10px_#ffffff] dark:bg-slate-800 dark:shadow-[5px_5px_10px_#0f172a,_-5px_-5px_10px_#334155]">
+          <div>
+            <h1 className="text-3xl font-dms text-slate-700 tracking-wide dark:text-slate-200">
+              <strong>Dashboard Overview</strong>
+            </h1>
+            <p className="text-slate-500 mt-1 dark:text-slate-400">
+              {activeView === "archive"
+                ? "Viewing archived tasks"
+                : activeView === "calendar"
+                ? "Calendar view"
+                : selectedCategoryId
+                ? "Tasks in selected category"
+                : "Your active tasks at a glance"}
+            </p>
+          </div>
+          <ThemeSwitch />
         </header>
 
-        <main className="flex-1 p-6 space-y-6">
+        <main className="flex-1 p-8 space-y-8">
           {/* Home + Archive */}
           <div
             className={
@@ -78,7 +87,7 @@ export default function DashboardLayout() {
             </div>
 
             {activeView === "home" && (
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-md p-4 w-full sm:min-h-[400px] transition-all">
+              <div className="bg-slate-100 rounded-3xl shadow-[8px_8px_16px_#d1d9e6,_-8px_-8px_16px_#ffffff] p-6 w-full sm:min-h-[400px] transition-all dark:bg-slate-800 dark:shadow-[8px_8px_16px_#0f172a,_-8px_-8px_16px_#334155]">
                 <CalendarView
                   tasks={visibleTasks}
                   onQuickAdd={(date) => appRef.current?.quickAdd(date)}
@@ -101,7 +110,7 @@ export default function DashboardLayout() {
 
           {/* Fullscreen calendar */}
           {activeView === "calendar" && (
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-md p-4 w-full min-h-[650px]">
+            <div className="bg-slate-100 rounded-3xl shadow-[8px_8px_16px_#d1d9e6,_-8px_-8px_16px_#ffffff] p-6 w-full min-h-[650px] dark:bg-slate-800 dark:shadow-[8px_8px_16px_#0f172a,_-8px_-8px_16px_#334155]">
               <CalendarView
                 tasks={visibleTasks}
                 onQuickAdd={(date) => appRef.current?.quickAdd(date)}

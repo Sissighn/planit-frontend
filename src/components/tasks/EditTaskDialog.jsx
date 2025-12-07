@@ -69,10 +69,16 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
   // Styles
   // ------------------------------
   const inputClass =
-    "w-full px-4 py-2.5 rounded-xl border border-purple-200 bg-white/70 " +
-    "focus:outline-none focus:ring-2 focus:ring-purple-300 shadow-inner text-gray-800";
+    "w-full px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 shadow-[inset_3px_3px_7px_#d1d9e6,_inset_-3px_-3px_7px_#ffffff] focus:outline-none focus:ring-2 focus:ring-purple-400 transition-shadow duration-200 " +
+    "dark:bg-slate-800 dark:text-slate-300 dark:shadow-[inset_3px_3px_7px_#0f172a,_inset_-3px_-3px_7px_#334155]";
 
-  const labelClass = "text-sm font-medium text-purple-700";
+  const labelClass = "text-sm font-medium text-purple-700 dark:text-purple-400";
+
+  const secondaryButton =
+    "px-5 py-2.5 rounded-xl bg-slate-100 text-purple-800 font-medium shadow-[5px_5px_10px_#d1d9e6,_-5px_-5px_10px_#ffffff] transition-all hover:shadow-[inset_5px_5px_10px_#d1d9e6,_inset_-5px_-5px_10px_#ffffff] dark:bg-slate-800 dark:text-purple-300 dark:shadow-[5px_5px_10px_#0f172a,_-5px_-5px_10px_#334155] dark:hover:shadow-[inset_5px_5px_10px_#0f172a,_inset_-5px_-5px_10px_#334155]";
+
+  const primaryButton =
+    "px-5 py-2.5 rounded-xl bg-purple-500 text-white font-medium shadow-[5px_5px_10px_#d1d9e6] hover:bg-purple-600 transition-all dark:bg-purple-600 dark:shadow-[5px_5px_10px_#0f172a] dark:hover:bg-purple-700";
 
   // ------------------------------
   // Dialog
@@ -80,20 +86,17 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
   const dialog = (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center 
-                 bg-purple-200/30 backdrop-blur-md"
+                 bg-slate-900/10 backdrop-blur-sm dark:bg-slate-900/30"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <form
         onSubmit={handleSubmit}
-        className="
-          bg-gradient-to-br from-purple-50 to-white/90
-          border border-purple-200/50 rounded-2xl shadow-2xl
-          w-[560px] max-h-[85vh] flex flex-col overflow-hidden animate-modalPop
-        "
+        className="bg-slate-100 rounded-3xl shadow-[8px_8px_16px_#d1d9e6,_-8px_-8px_16px_#ffffff] w-[560px] max-h-[85vh] flex flex-col overflow-hidden animate-modalPop dark:bg-slate-800 dark:shadow-[8px_8px_16px_#0f172a,_-8px_-8px_16px_#334155]"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
-        <div className="px-8 py-6 border-b border-purple-200/40 bg-white/60 backdrop-blur-sm">
-          <h2 className="text-2xl font-semibold text-purple-700 text-center">
+        <div className="px-8 py-6 border-b border-slate-200/80 dark:border-slate-700/80">
+          <h2 className="text-2xl font-semibold text-purple-700 text-center dark:text-purple-400">
             Edit Task
           </h2>
         </div>
@@ -175,19 +178,12 @@ export default function EditTaskDialog({ task, onEdit, onClose }) {
         </div>
 
         {/* FOOTER */}
-        <div className="px-8 py-4 border-t border-purple-200/40 bg-white/60 backdrop-blur-sm flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-purple-200 text-purple-800 hover:bg-purple-300"
-          >
+        <div className="px-8 py-4 border-t border-slate-200/80 flex justify-end gap-4 dark:border-slate-700/80">
+          <button type="button" onClick={onClose} className={secondaryButton}>
             Cancel
           </button>
 
-          <button
-            type="submit"
-            className="px-5 py-2 rounded-xl bg-purple-500 text-white hover:bg-purple-600"
-          >
+          <button type="submit" className={primaryButton}>
             Save
           </button>
         </div>

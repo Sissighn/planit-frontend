@@ -72,7 +72,7 @@ describe("TaskItem Component", () => {
       />
     );
 
-    const toggleButton = screen.getByRole("button", { name: "done_outline" });
+    const toggleButton = screen.getByRole("button", { name: "Mark as done" });
     fireEvent.click(toggleButton);
 
     expect(onToggle).toHaveBeenCalledWith("1");

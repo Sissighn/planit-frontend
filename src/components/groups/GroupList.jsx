@@ -1,4 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { Folder, Tag, MoreVertical, Check, Plus } from "lucide-react";
+import {
+  getGroups,
+  addGroup,
+  deleteGroup,
+  updateGroup,
+} from "../../services/api";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 export default function GroupList({ onSelectGroup }) {
   const [groups, setGroups] = useState([]);
@@ -9,11 +17,20 @@ export default function GroupList({ onSelectGroup }) {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const listRef = useRef(null);
   const renameInputRef = useRef(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+
+  // --- Styles ---
+  const inputClass =
+    "flex-1 p-2 rounded-lg bg-slate-100 text-slate-700 text-sm placeholder-slate-400 shadow-[inset_3px_3px_5px_#d1d9e6,_inset_-3px_-3px_5px_#ffffff] focus:outline-none focus:ring-1 focus:ring-purple-400 transition-all";
+  const neumorphicButton =
+    "p-2 rounded-lg bg-slate-100 text-purple-800 shadow-[3px_3px_6px_#d1d9e6,_-3px_-3px_6px_#ffffff] transition-all hover:shadow-[inset_3px_3px_6px_#d1d9e6,_inset_-3px_-3px_6px_#ffffff] active:shadow-[inset_3px_3px_6px_#d1d9e6,_inset_-3px_-3px_6px_#ffffff]";
+  const menuItemClass =
+    "block w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-200/70";
 
   // Load groups on mount
   useEffect(() => {
-    fetch("http://localhost:8080/api/groups")
-      .then((res) => res.json())
+    getGroups()
       .then(setGroups)
       .catch((err) => console.error("Failed to load groups:", err));
   }, []);
@@ -43,34 +60,33 @@ export default function GroupList({ onSelectGroup }) {
   const handleAddGroup = async () => {
     if (!newGroupName.trim()) return;
     try {
-      const res = await fetch("http://localhost:8080/api/groups", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newGroupName }),
-      });
-      if (res.ok) {
-        const created = await res.json();
-        setGroups([...groups, created]);
-        setNewGroupName("");
-        setShowInput(false);
-      }
+      const created = await addGroup({ name: newGroupName });
+      setGroups([...groups, created]);
+      setNewGroupName("");
+      setShowInput(false);
     } catch (err) {
       console.error("Error adding group:", err);
+      alert("Failed to add group. See console for details.");
     }
   };
 
   // Delete group
-  const handleDelete = async (id) => {
-    if (!confirm("Delete this group?")) return;
+  const handleDeleteRequest = (id) => {
+    setItemToDelete(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
     try {
-      const res = await fetch(`http://localhost:8080/api/groups/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setGroups(groups.filter((g) => g.id !== id));
-      }
+      await deleteGroup(itemToDelete);
+      setGroups(groups.filter((g) => g.id !== itemToDelete));
     } catch (err) {
       console.error("Error deleting group:", err);
+      alert("Failed to delete group. See console for details.");
+    } finally {
+      setItemToDelete(null);
+      setConfirmOpen(false);
     }
   };
 
@@ -80,50 +96,36 @@ export default function GroupList({ onSelectGroup }) {
     if (!name) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/groups/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-
-        body: JSON.stringify({ id, name }),
-      });
-
-      if (!res.ok) {
-        const msg = await res.text().catch(() => "");
-        console.error("Rename failed:", res.status, msg);
-        alert(`Rename failed (${res.status}): ${msg || "unknown error"}`);
-        return;
-      }
+      await updateGroup(id, { id, name });
       setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, name } : g)));
       setEditingId(null);
       setEditingName("");
     } catch (err) {
       console.error("Error renaming group:", err);
-      alert("Network error while renaming group.");
+      alert("Failed to rename group. See console for details.");
     }
   };
 
   return (
-    <div ref={listRef} className="mt-6">
+    <div ref={listRef}>
       {/* 🔹 Header */}
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-black text-lg">
-            folder_open
-          </span>
-          <h2 className="font-cormorant text-slate-700">Categories</h2>
+          <Folder size={20} className="text-purple-800" />
+          <h2 className="font-cormorant text-slate-700 text-lg">Categories</h2>
         </div>
 
         <button
-          className="text-purple-400 text-sm hover:underline"
+          className="text-purple-600 text-sm font-semibold hover:text-purple-800"
           onClick={() => setShowInput(!showInput)}
         >
-          + New
+          {showInput ? "Cancel" : "+ New"}
         </button>
       </div>
 
       {/* Add new group input */}
       {showInput && (
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-2 mb-4 animate-modalPop duration-300">
           <input
             type="text"
             value={newGroupName}
@@ -134,21 +136,18 @@ export default function GroupList({ onSelectGroup }) {
                 handleAddGroup();
               }
             }}
-            className="flex-1 rounded-lg bg-white/20 p-2 text-sm border border-white/20"
+            className={inputClass}
             placeholder="Enter the name"
+            autoFocus
           />
-          <button
-            onClick={handleAddGroup}
-            className="px-2 py-2 rounded-xl bg-purple-400/100 text-white text-sm font-medium
-             hover:bg-purple-600 hover:shadow-sm active:scale-[0.98] transition-all"
-          >
-            Add
+          <button onClick={handleAddGroup} className={neumorphicButton}>
+            <Plus size={18} />
           </button>
         </div>
       )}
 
       {/* Group list */}
-      <ul className="space-y-1">
+      <ul className="space-y-2">
         {groups.map((g) => (
           <li
             key={g.id}
@@ -168,17 +167,14 @@ export default function GroupList({ onSelectGroup }) {
                       setEditingId(null);
                     }
                   }}
-                  className="flex-1 bg-white/80 border border-purple-200 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-purple-300"
+                  className={inputClass}
                 />
 
                 <button
-                  onClick={() => {
-                    console.log("Saving rename", { id: g.id, editingName });
-                    handleRename(g.id);
-                  }}
-                  className="text-green-600 text-xs font-medium hover:underline"
+                  onClick={() => handleRename(g.id)}
+                  className={neumorphicButton}
                 >
-                  Save
+                  <Check size={18} className="text-green-600" />
                 </button>
               </div>
             ) : (
@@ -187,9 +183,7 @@ export default function GroupList({ onSelectGroup }) {
                   onClick={() => onSelectGroup(g.id)}
                   className="flex items-center gap-2 flex-1 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-base text-black">
-                    category
-                  </span>
+                  <Tag size={16} className="text-purple-700" />
                   <span>{g.name}</span>
                 </div>
 
@@ -199,26 +193,26 @@ export default function GroupList({ onSelectGroup }) {
                     onClick={() =>
                       setMenuOpenId(menuOpenId === g.id ? null : g.id)
                     }
-                    className="material-symbols-outlined text-gray-500 hover:text-purple-700 text-lg"
+                    className="p-1 rounded-full text-slate-500 hover:bg-slate-200/70 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    more_vert
+                    <MoreVertical size={18} />
                   </button>
 
                   {menuOpenId === g.id && (
-                    <div className="absolute right-0 mt-1 w-28 bg-white border border-gray-200 rounded-lg shadow-md z-10">
+                    <div className="absolute right-0 mt-1 w-32 bg-slate-100 rounded-xl shadow-[5px_5px_10px_#d1d9e6,_-5px_-5px_10px_#ffffff] z-10">
                       <button
                         onClick={() => {
                           setEditingId(g.id);
                           setEditingName(g.name);
                           setMenuOpenId(null);
                         }}
-                        className="block w-full text-left px-3 py-2 text-sm hover:bg-purple-50"
+                        className={`${menuItemClass} rounded-t-xl`}
                       >
                         Rename
                       </button>
                       <button
-                        onClick={() => handleDelete(g.id)}
-                        className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                        onClick={() => handleDeleteRequest(g.id)}
+                        className={`${menuItemClass} text-red-600 rounded-b-xl`}
                       >
                         Delete
                       </button>
@@ -230,6 +224,19 @@ export default function GroupList({ onSelectGroup }) {
           </li>
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Category"
+        message="Are you sure you want to delete this category? All tasks within it will be un-categorized."
+        variant="danger"
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setItemToDelete(null);
+        }}
+      />
     </div>
   );
 }

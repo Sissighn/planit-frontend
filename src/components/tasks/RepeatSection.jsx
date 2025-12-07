@@ -15,10 +15,17 @@ export default function RepeatSection({
   };
 
   const inputClass =
-    "w-full px-4 py-3 rounded-2xl border border-purple-200 bg-white/70 " +
-    "focus:outline-none focus:ring-2 focus:ring-purple-300 shadow-inner text-gray-800";
+    "w-full px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 shadow-[inset_3px_3px_7px_#d1d9e6,_inset_-3px_-3px_7px_#ffffff] focus:outline-none focus:ring-2 focus:ring-purple-400 transition-shadow duration-200 " +
+    "dark:bg-slate-800 dark:text-slate-300 dark:shadow-[inset_3px_3px_7px_#0f172a,_inset_-3px_-3px_7px_#334155]";
 
-  const labelClass = "text-sm font-medium text-purple-700";
+  const labelClass = "text-sm font-medium text-purple-700 dark:text-purple-400";
+
+  const dayButtonBase =
+    "px-3 py-1.5 rounded-lg text-sm font-medium transition-all";
+  const dayButtonActive =
+    "bg-slate-100 text-purple-600 shadow-[inset_3px_3px_6px_#d1d9e6,_inset_-3px_-3px_6px_#ffffff] dark:bg-slate-800 dark:text-purple-400 dark:shadow-[inset_3px_3px_6px_#0f172a,_inset_-3px_-3px_6px_#334155]";
+  const dayButtonInactive =
+    "bg-slate-100 text-purple-800 shadow-[3px_3px_6px_#d1d9e6,_-3px_-3px_6px_#ffffff] hover:text-purple-600 dark:bg-slate-800 dark:text-purple-300 dark:shadow-[3px_3px_6px_#0f172a,_-3px_-3px_6px_#334155] dark:hover:text-purple-400";
 
   return (
     <div className="space-y-4">
@@ -46,12 +53,9 @@ export default function RepeatSection({
               type="button"
               key={day}
               onClick={() => toggleDay(day)}
-              className={
-                "px-3 py-1.5 rounded-lg border text-[13px] transition-all " +
-                (repeatDays.includes(day)
-                  ? "bg-purple-500 text-white border-purple-600 shadow"
-                  : "bg-white border-purple-200 text-purple-700 shadow-inner")
-              }
+              className={`${dayButtonBase} ${
+                repeatDays.includes(day) ? dayButtonActive : dayButtonInactive
+              }`}
             >
               {day}
             </button>
